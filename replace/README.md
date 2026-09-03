@@ -8,12 +8,16 @@ npm run replace-images
 
 The script will automatically:
 1. Convert your image to **both PNG and WebP** formats with full transparency.
-2. Replace the corresponding files in `public/images/` and `public/images_webp/`.
+2. Replace the corresponding files in `public/images/`, `public/images_webp/`, or `public/`.
 3. Update the 3D book texture in real-time.
 
 ---
 
 ## 📋 List of Replaceable Images & Names:
+
+### 🧭 Navigation & UI Icons:
+- `arrow.png` (Previous & Next page navigation arrow in the nav bar)
+- `open_link.png` (External link arrow icon)
 
 ### 📖 Covers:
 - `cover.png` / `cover.jpg` (Front Book Cover)

@@ -3,6 +3,7 @@ const path = require('path');
 const sharp = require('sharp');
 
 const REPLACE_DIR = path.join(__dirname, 'replace');
+const PUBLIC_DIR = path.join(__dirname, 'public');
 const IMAGES_DIR = path.join(__dirname, 'public', 'images');
 const WEBP_DIR = path.join(__dirname, 'public', 'images_webp');
 
@@ -11,9 +12,6 @@ if (!fs.existsSync(REPLACE_DIR)) {
   fs.mkdirSync(REPLACE_DIR, { recursive: true });
 }
 
-/**
- * Recursively find all files in a directory
- */
 function getAllFiles(dirPath, arrayOfFiles = []) {
   if (!fs.existsSync(dirPath)) return arrayOfFiles;
   const files = fs.readdirSync(dirPath);
@@ -30,9 +28,6 @@ function getAllFiles(dirPath, arrayOfFiles = []) {
   return arrayOfFiles;
 }
 
-/**
- * Build index of all existing images in public/images
- */
 function buildTargetIndex() {
   const existingFiles = getAllFiles(IMAGES_DIR);
   const index = new Map();
@@ -40,16 +35,19 @@ function buildTargetIndex() {
   existingFiles.forEach((file) => {
     const relFromImages = path.relative(IMAGES_DIR, file);
     const baseNameWithoutExt = path.parse(file).name;
-    
-    // Store by relative path without extension (e.g. '01/01_Inside_lasse_0004_background' or 'cover')
     const relKey = relFromImages.replace(/\\/g, '/').replace(/\.[^/.]+$/, '');
     index.set(relKey, relFromImages);
 
-    // Also store by pure filename for convenient flat drops (e.g. dropping '01_Inside_lasse_0004_background.jpg' directly in replace/)
     if (!index.has(baseNameWithoutExt)) {
       index.set(baseNameWithoutExt, relFromImages);
     }
   });
+
+  // UI Icons in public root
+  index.set('arrow', 'UI_ARROW');
+  index.set('arrow.3779d7ca', 'UI_ARROW');
+  index.set('open_link', 'UI_OPEN_LINK');
+  index.set('open_link.9c13ce2f', 'UI_OPEN_LINK');
 
   return index;
 }
@@ -65,7 +63,7 @@ async function processReplacements() {
   if (replaceFiles.length === 0) {
     console.log('ℹ️  No images found in the "replace/" folder.');
     console.log('💡 How to use:');
-    console.log('   1. Drop your new image into the "replace/" folder (e.g., cover.jpg, 01_Inside_lasse_0004_background.png)');
+    console.log('   1. Drop your new image into the "replace/" folder (e.g., arrow.png, cover.jpg, 01_Inside_lasse_0004_background.png)');
     console.log('   2. Run: npm run replace-images\n');
     return;
   }
@@ -79,32 +77,39 @@ async function processReplacements() {
     const relKey = relFromReplace.replace(/\.[^/.]+$/, '');
     const baseName = parsed.name;
 
-    // Match by relative structure or basename
     const matchedTargetRel = targetIndex.get(relKey) || targetIndex.get(baseName);
 
     if (!matchedTargetRel) {
-      console.warn(`⚠️  Skipping "${relFromReplace}": No matching image found in public/images/`);
+      console.warn(`⚠️  Skipping "${relFromReplace}": No matching image found in public/images/ or UI icons.`);
       continue;
     }
 
-    const relWithoutExt = matchedTargetRel.replace(/\.[^/.]+$/, '');
-    const targetPng = path.join(IMAGES_DIR, `${relWithoutExt}.png`);
-    const targetWebp = path.join(WEBP_DIR, `${relWithoutExt}.webp`);
-
-    // Ensure target directories exist
-    fs.mkdirSync(path.dirname(targetPng), { recursive: true });
-    fs.mkdirSync(path.dirname(targetWebp), { recursive: true });
-
     try {
-      // Convert and save PNG (preserves transparency)
-      await sharp(srcFile)
-        .png({ quality: 100, compressionLevel: 8 })
-        .toFile(targetPng);
+      if (matchedTargetRel === 'UI_ARROW') {
+        const arrowTarget = path.join(PUBLIC_DIR, 'arrow.3779d7ca.png');
+        await sharp(srcFile).png().toFile(arrowTarget);
+        console.log(`✅ Successfully replaced Nav Arrow icon: public/arrow.3779d7ca.png\n`);
+        replacedCount++;
+        continue;
+      }
 
-      // Convert and save WebP (high quality & compressed)
-      await sharp(srcFile)
-        .webp({ quality: 90 })
-        .toFile(targetWebp);
+      if (matchedTargetRel === 'UI_OPEN_LINK') {
+        const linkTarget = path.join(PUBLIC_DIR, 'open_link.9c13ce2f.png');
+        await sharp(srcFile).png().toFile(linkTarget);
+        console.log(`✅ Successfully replaced Open Link icon: public/open_link.9c13ce2f.png\n`);
+        replacedCount++;
+        continue;
+      }
+
+      const relWithoutExt = matchedTargetRel.replace(/\.[^/.]+$/, '');
+      const targetPng = path.join(IMAGES_DIR, `${relWithoutExt}.png`);
+      const targetWebp = path.join(WEBP_DIR, `${relWithoutExt}.webp`);
+
+      fs.mkdirSync(path.dirname(targetPng), { recursive: true });
+      fs.mkdirSync(path.dirname(targetWebp), { recursive: true });
+
+      await sharp(srcFile).png({ quality: 100, compressionLevel: 8 }).toFile(targetPng);
+      await sharp(srcFile).webp({ quality: 90 }).toFile(targetWebp);
 
       console.log(`✅ Successfully replaced:`);
       console.log(`   ➜ PNG:  public/images/${relWithoutExt}.png`);
