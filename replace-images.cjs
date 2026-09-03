@@ -43,7 +43,8 @@ function buildTargetIndex() {
     }
   });
 
-  // UI Icons in public root
+  // UI Icons & Logo in public root
+  index.set('logo', 'UI_LOGO');
   index.set('arrow', 'UI_ARROW');
   index.set('arrow.3779d7ca', 'UI_ARROW');
   index.set('open_link', 'UI_OPEN_LINK');
@@ -63,7 +64,7 @@ async function processReplacements() {
   if (replaceFiles.length === 0) {
     console.log('ℹ️  No images found in the "replace/" folder.');
     console.log('💡 How to use:');
-    console.log('   1. Drop your new image into the "replace/" folder (e.g., arrow.png, cover.jpg, 01_Inside_lasse_0004_background.png)');
+    console.log('   1. Drop your new image into the "replace/" folder (e.g., logo.png, cover.jpg, 01_Inside_lasse_0004_background.png)');
     console.log('   2. Run: npm run replace-images\n');
     return;
   }
@@ -85,6 +86,14 @@ async function processReplacements() {
     }
 
     try {
+      if (matchedTargetRel === 'UI_LOGO') {
+        const logoTarget = path.join(PUBLIC_DIR, 'logo.png');
+        await sharp(srcFile).png().toFile(logoTarget);
+        console.log(`✅ Successfully replaced Top Navbar Logo: public/logo.png\n`);
+        replacedCount++;
+        continue;
+      }
+
       if (matchedTargetRel === 'UI_ARROW') {
         const arrowTarget = path.join(PUBLIC_DIR, 'arrow.3779d7ca.png');
         await sharp(srcFile).png().toFile(arrowTarget);

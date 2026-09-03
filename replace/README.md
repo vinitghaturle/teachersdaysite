@@ -15,6 +15,9 @@ The script will automatically:
 
 ## 📋 List of Replaceable Images & Names:
 
+### 🏷️ Top Navbar Title / Logo:
+- `logo.png` / `logo.jpg` (The "HOW TO TALK TO WHITE KIDS ABOUT RACISM" header logo in the top bar)
+
 ### 🧭 Navigation & UI Icons:
 - `arrow.png` (Previous & Next page navigation arrow in the nav bar)
 - `open_link.png` (External link arrow icon)
