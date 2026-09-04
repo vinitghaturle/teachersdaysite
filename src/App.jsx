@@ -1,6 +1,7 @@
 import React from 'react';
 import { Header } from './components/Header/Header';
 import { ThreeBookCanvas } from './components/BookEngine/ThreeBookCanvas';
+import { NameInputOverlay } from './components/NameInputOverlay/NameInputOverlay';
 import { FooterLinks } from './components/Footer/FooterLinks';
 import './styles/fonts.css';
 import './styles/main.css';
@@ -13,6 +14,9 @@ export default function App() {
 
       {/* Top Left Title & Hello Monday Branding */}
       <Header />
+
+      {/* Interactive Name Input & Let's Begin button for Page 1 */}
+      <NameInputOverlay />
 
       {/* Bottom Right Share & Typography Attribution */}
       <FooterLinks />

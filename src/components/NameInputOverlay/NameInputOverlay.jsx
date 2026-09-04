@@ -51,7 +51,10 @@ export const NameInputOverlay = () => {
   }, []);
 
   const handleBegin = (e) => {
-    if (e) e.preventDefault();
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
 
     const trimmed = userName.trim();
     if (!trimmed) {
@@ -77,14 +80,42 @@ export const NameInputOverlay = () => {
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
+      e.preventDefault();
+      e.stopPropagation();
       handleBegin(e);
     }
   };
 
+  const stopCapture = (e) => {
+    e.stopPropagation();
+  };
+
   return (
-    <div className={`name-input-overlay-container ${!isActive ? 'hidden' : ''}`}>
-      <form onSubmit={handleBegin} className="w-full flex flex-col items-center">
-        <div className={`name-input-box-wrapper ${hasError ? 'error' : ''}`}>
+    <div
+      className={`name-input-overlay-container ${!isActive ? 'hidden' : ''}`}
+      data-clickable="true"
+      onMouseDown={stopCapture}
+      onPointerDown={stopCapture}
+      onTouchStart={stopCapture}
+    >
+      <form
+        onSubmit={handleBegin}
+        className="w-full flex flex-col items-center"
+        data-clickable="true"
+        onMouseDown={stopCapture}
+        onPointerDown={stopCapture}
+        onTouchStart={stopCapture}
+      >
+        <div
+          className={`name-input-box-wrapper ${hasError ? 'error' : ''}`}
+          data-clickable="true"
+          onClick={() => {
+            if (inputRef.current) inputRef.current.focus();
+          }}
+          onMouseDown={stopCapture}
+          onPointerDown={stopCapture}
+          onTouchStart={stopCapture}
+        >
           {/* User Icon */}
           <svg
             className="name-input-icon"
@@ -108,6 +139,7 @@ export const NameInputOverlay = () => {
             className="name-real-input"
             placeholder="Enter your name"
             value={userName}
+            data-clickable="true"
             onChange={(e) => {
               setUserName(e.target.value);
               if (hasError && e.target.value.trim()) {
@@ -115,6 +147,9 @@ export const NameInputOverlay = () => {
               }
             }}
             onKeyDown={handleKeyDown}
+            onMouseDown={stopCapture}
+            onPointerDown={stopCapture}
+            onTouchStart={stopCapture}
             aria-label="Enter your name"
             autoComplete="name"
           />
@@ -126,9 +161,14 @@ export const NameInputOverlay = () => {
 
         {/* Real interactive Let's Begin button */}
         <button
-          type="submit"
+          type="button"
           className="name-begin-button"
           aria-label="Let's Begin"
+          data-clickable="true"
+          onClick={handleBegin}
+          onMouseDown={stopCapture}
+          onPointerDown={stopCapture}
+          onTouchStart={stopCapture}
         >
           <span>Let's Begin</span>
           <svg

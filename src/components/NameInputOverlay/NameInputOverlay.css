@@ -1,22 +1,28 @@
 /* Interactive Name Input Overlay for Page 1 */
 .name-input-overlay-container {
-  position: absolute;
+  position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  z-index: 10;
+  z-index: 999999 !important;
   display: flex;
   flex-direction: column;
   align-items: center;
-  pointer-events: auto;
+  justify-content: center;
+  pointer-events: auto !important;
   width: 90%;
   max-width: 440px;
-  transition: opacity 0.4s ease, transform 0.4s ease;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transition: opacity 0.35s ease, transform 0.35s ease;
 }
 
 .name-input-overlay-container.hidden {
   opacity: 0;
-  pointer-events: none;
+  pointer-events: none !important;
+  visibility: hidden;
   transform: translate(-50%, -46%);
 }
 
@@ -30,13 +36,14 @@
   border-radius: 12px;
   padding: 0 16px;
   height: 52px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  transition: all 0.25s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  pointer-events: auto !important;
+  cursor: text !important;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
 }
 
 .name-input-box-wrapper:focus-within {
   border-color: #E8A735;
-  box-shadow: 0 0 0 3px rgba(232, 167, 53, 0.2), 0 4px 12px rgba(0, 0, 0, 0.06);
   background-color: #FFFFFF;
 }
 
@@ -49,6 +56,7 @@
   color: #7E786D;
   margin-right: 12px;
   flex-shrink: 0;
+  pointer-events: none;
 }
 
 .name-real-input {
@@ -56,11 +64,15 @@
   height: 100%;
   border: none;
   outline: none;
-  background: transparent;
+  background: transparent !important;
   font-family: inherit;
   font-size: 16px;
   color: #2D2926;
   font-weight: 500;
+  cursor: text !important;
+  pointer-events: auto !important;
+  user-select: text !important;
+  -webkit-user-select: text !important;
 }
 
 .name-real-input::placeholder {
@@ -86,24 +98,36 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  cursor: pointer;
-  box-shadow: 0 4px 14px rgba(232, 167, 53, 0.35), 0 1px 3px rgba(0,0,0,0.1);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  box-shadow: 0 4px 12px rgba(232, 167, 53, 0.3);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.name-begin-button * {
+  cursor: pointer !important;
+  pointer-events: none;
 }
 
 .name-begin-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(232, 167, 53, 0.45);
+  box-shadow: 0 6px 18px rgba(232, 167, 53, 0.4);
   background: linear-gradient(180deg, #FFD978 0%, #F8C547 100%);
+  cursor: pointer !important;
 }
 
 .name-begin-button:active {
   transform: translateY(1px);
-  box-shadow: 0 2px 6px rgba(232, 167, 53, 0.3);
+  box-shadow: 0 2px 5px rgba(232, 167, 53, 0.25);
+  cursor: pointer !important;
 }
 
 .name-begin-button svg {
   transition: transform 0.2s ease;
+  pointer-events: none;
 }
 
 .name-begin-button:hover svg {
@@ -115,6 +139,7 @@
   font-size: 12px;
   margin-top: 6px;
   font-weight: 500;
+  pointer-events: none;
 }
 
 @keyframes shake {

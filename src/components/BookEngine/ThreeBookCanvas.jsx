@@ -3,7 +3,6 @@ import { NavigationArrows } from '../Navigation/NavigationArrows';
 import { ExtraResources } from '../Resources/ExtraResources';
 import { CaptionsOverlay } from '../Captions/CaptionsOverlay';
 import { PretextOverlay } from '../Pretext/PretextOverlay';
-import { NameInputOverlay } from '../NameInputOverlay/NameInputOverlay';
 import { initBookEngine } from './engine';
 
 export const ThreeBookCanvas = () => {
@@ -21,9 +20,6 @@ export const ThreeBookCanvas = () => {
 
       <CaptionsOverlay />
       <PretextOverlay />
-
-      {/* Interactive Name Input & Let's Begin button for Page 1 */}
-      <NameInputOverlay />
     </div>
   );
 };
