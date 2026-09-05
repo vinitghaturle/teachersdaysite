@@ -302,10 +302,14 @@ export async function renderResultPageTexture(resultData, score, userName, timeT
     const W = canvas.width;
     const H = canvas.height;
 
-    // 1. Base background: warm soft cream paper with subtle original texture
-    ctx.fillStyle = '#FFFDF8';
+    // 1. Base background: warm yellow theme matching Teachers Day Special
+    const bgGrad = ctx.createLinearGradient(0, 0, W, H);
+    bgGrad.addColorStop(0, '#FEFCE8');
+    bgGrad.addColorStop(0.5, '#FEF9C3');
+    bgGrad.addColorStop(1, '#FDE68A');
+    ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, W, H);
-    ctx.globalAlpha = 0.22;
+    ctx.globalAlpha = 0.15;
     ctx.drawImage(bgImg, 0, 0, W, H);
     ctx.globalAlpha = 1.0;
 
