@@ -1,17 +1,15 @@
 import React from 'react';
-import { CHAPTERS_DATA } from '../../data/chaptersData';
 
 export const CaptionsOverlay = () => {
+  // Maintain 8 dummy caption divs so Three.js GSAP animation timeline stays synced without text collision
+  const dummyPages = [0, 1, 2, 3, 4, 5, 6, 7];
+
   return (
-    <div className="captions">
-      {CHAPTERS_DATA.map((chapter) => (
-        <div key={chapter.id} className="caption">
-          <h2>{chapter.title}</h2>
-          {chapter.paragraphs.map((p, idx) => (
-            <p key={idx}>{p}</p>
-          ))}
-        </div>
+    <div className="captions" style={{ pointerEvents: 'none', visibility: 'hidden', opacity: 0 }}>
+      {dummyPages.map((idx) => (
+        <div key={idx} className="caption" />
       ))}
     </div>
   );
 };
+

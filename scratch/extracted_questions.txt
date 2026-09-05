@@ -1,0 +1,398 @@
+
+
+
+
+Build Your Own Compliment
+
+
+
+Teachers&apos; Day question bank — 20 scenario-based fill-in-the-blank prompts, 4 options each. Only one option actually completes the sentence naturally; the rest are stiffer, formal-sounding decoys.
+
+
+
+Welcome screen — 5 opening lines
+
+
+
+Shown before the quiz starts. Pick one at random, or cycle through them.
+
+
+
+•  Ready, Sir/Ma&apos;am? Let&apos;s see how well your students actually paid attention.
+
+
+
+•  Happy Teachers&apos; Day! Time to find out how well we know you — no pressure.
+
+
+
+•  Grab a seat. This one&apos;s basically a report card, except this time it&apos;s for us.
+
+
+
+•  Fair warning: we&apos;re about to attempt describing you in exactly the right words.
+
+
+
+•  Five questions. One compliment. Let&apos;s build it together.
+
+
+
+Result screen — score-based messages
+
+
+
+Shown after the teacher answers all 5. Based on how many match the marked correct option.
+
+Score
+
+Label
+
+Message shown
+
+5 / 5
+
+Certified Icon
+
+Five for five. Either we know you too well, or you&apos;ve made a real impression — probably both.
+
+4 / 5
+
+Lowkey Iconic
+
+So close to a clean sweep. One question stumped us, the rest was easy.
+
+3 / 5
+
+Kinda Slaps
+
+A solid guess rate. We know you well — just not psychic-level well.
+
+2 / 5
+
+Mid, Ngl
+
+A few lucky guesses in there. Might be time you told us more about yourself.
+
+0–1 / 5
+
+It&apos;s Giving Stranger
+
+Rough round. Might be time for that long-overdue chai and catch-up.
+
+
+
+Easy — 12 questions
+
+
+
+Everyday classroom moments. Three formal-sounding decoys, one Gen Z option that&apos;s the natural fit.
+
+Scenario (fill the blank)
+
+Options — formal (decoy) vs Gen Z (fit)
+
+Correct
+
+Q1. On the first day of class, you made sure every student felt ___.
+
+a) included and comfortable in the classroom environment  [Formal — decoy]
+
+b) part of a supportive learning space  [Formal — decoy]
+
+c) acknowledged as an individual  [Formal — decoy]
+
+d) seen, fr  [Gen Z — fits]
+
+
+
+d)
+
+Q2. When a student got a bad grade, you reminded them that ___.
+
+a) academic performance does not define their overall potential  [Formal — decoy]
+
+b) growth is a continuous and ongoing process  [Formal — decoy]
+
+c) setbacks are a normal part of the learning journey  [Formal — decoy]
+
+d) it&apos;s not that deep, they&apos;ll bounce back  [Gen Z — fits]
+
+
+
+d)
+
+Q3. Before a big exam, you told the class to ___.
+
+a) maintain composure and focus on the task at hand  [Formal — decoy]
+
+b) approach each question with careful consideration  [Formal — decoy]
+
+c) trust in their level of preparedness  [Formal — decoy]
+
+d) just breathe and lock in  [Gen Z — fits]
+
+
+
+d)
+
+Q4. When someone forgot their notebook, you ___.
+
+a) addressed the situation without drawing unnecessary attention  [Formal — decoy]
+
+b) ensured the student was not disadvantaged  [Formal — decoy]
+
+c) handled it in a calm and professional manner  [Formal — decoy]
+
+d) said &quot;it happens, no stress&quot; and moved on  [Gen Z — fits]
+
+
+
+d)
+
+Q5. A student asked a question that felt &quot;too basic&quot; to ask. You made sure they knew ___.
+
+a) there is no hierarchy of valid questions in a learning environment  [Formal — decoy]
+
+b) every question contributes meaningfully to the discussion  [Formal — decoy]
+
+c) clarification is a productive use of classroom time  [Formal — decoy]
+
+d) there&apos;s no such thing as a dumb question, fr  [Gen Z — fits]
+
+
+
+d)
+
+Q6. When the class got a tough topic wrong on the first try, you simply ___.
+
+a) re-evaluated the instructional approach accordingly  [Formal — decoy]
+
+b) provided an alternative method of explanation  [Formal — decoy]
+
+c) allowed additional time for conceptual understanding  [Formal — decoy]
+
+d) said &quot;let&apos;s run it back&quot; and tried again  [Gen Z — fits]
+
+
+
+d)
+
+Q7. On a rainy day when everyone seemed low-energy, you ___.
+
+a) adjusted the lesson plan to accommodate the mood  [Formal — decoy]
+
+b) reduced the pace of instruction accordingly  [Formal — decoy]
+
+c) maintained a calm and steady classroom atmosphere  [Formal — decoy]
+
+d) said &quot;mood&apos;s off today, let&apos;s keep it chill&quot;  [Gen Z — fits]
+
+
+
+d)
+
+Q8. When two students got into a small disagreement, you ___.
+
+a) facilitated a resolution through open dialogue  [Formal — decoy]
+
+b) ensured both parties felt heard and respected  [Formal — decoy]
+
+c) mediated the situation in a fair and balanced manner  [Formal — decoy]
+
+d) said &quot;let&apos;s squash this&quot; and got them talking it out  [Gen Z — fits]
+
+
+
+d)
+
+Q9. A student who usually struggles finally passed a tough assignment. You made sure to ___.
+
+a) formally recognize their improvement and effort  [Formal — decoy]
+
+b) provide constructive reinforcement of their progress  [Formal — decoy]
+
+c) acknowledge the significance of their achievement  [Formal — decoy]
+
+d) hype them up, no cap deserved  [Gen Z — fits]
+
+
+
+d)
+
+Q10. When the class was distracted before a holiday, you ___.
+
+a) restructured the session to maintain engagement  [Formal — decoy]
+
+b) implemented a shorter, more focused lesson  [Formal — decoy]
+
+c) acknowledged the shift in classroom energy  [Formal — decoy]
+
+d) said &quot;I see you, holiday brain&quot; and rolled with it  [Gen Z — fits]
+
+
+
+d)
+
+Q11. A student admitted they didn&apos;t understand the homework at all. You responded by ___.
+
+a) providing a detailed step-by-step explanation  [Formal — decoy]
+
+b) reassuring them that confusion is a normal part of learning  [Formal — decoy]
+
+c) offering additional support outside of class time  [Formal — decoy]
+
+d) saying &quot;say less, let&apos;s fix this&quot; and pulling up a chair  [Gen Z — fits]
+
+
+
+d)
+
+Q12. When someone finally spoke confidently in front of the class for the first time, you gave them ___.
+
+a) constructive and specific feedback  [Formal — decoy]
+
+b) a formal acknowledgment of their progress  [Formal — decoy]
+
+c) genuine encouragement to continue  [Formal — decoy]
+
+d) certified main character energy  [Gen Z — fits]
+
+
+
+d)
+
+
+
+Hard — 8 questions
+
+
+
+Sharper real-life scenarios. Same rule — three stiff, textbook-sounding decoys, one Gen Z option that actually completes the sentence.
+
+Scenario (fill the blank)
+
+Options — formal (decoy) vs Gen Z (fit)
+
+Correct
+
+Q13. A student turned in an assignment two days late with zero explanation. You didn&apos;t yell, you just gave them ___.
+
+a) an opportunity to explain the delay  [Formal — decoy]
+
+b) a formal warning regarding the deadline  [Formal — decoy]
+
+c) additional time to complete the submission  [Formal — decoy]
+
+d) a little grace, that&apos;s it  [Gen Z — fits]
+
+
+
+d)
+
+Q14. Someone in the back row dozed off mid-lecture. Instead of embarrassing them, you ___.
+
+a) allowed them to rest without interruption  [Formal — decoy]
+
+b) addressed the situation privately after class  [Formal — decoy]
+
+c) gently brought their attention back to the lesson  [Formal — decoy]
+
+d) hit them with a lowkey nudge, no cap  [Gen Z — fits]
+
+
+
+d)
+
+Q15. A student finally cracked a concept they&apos;d been stuck on for weeks. Your reaction was ___.
+
+a) an expression of professional satisfaction  [Formal — decoy]
+
+b) validation of their sustained effort  [Formal — decoy]
+
+c) acknowledgment of their academic growth  [Formal — decoy]
+
+d) pure &quot;let&apos;s gooo&quot; energy  [Gen Z — fits]
+
+
+
+d)
+
+Q16. During group work, one student was clearly carrying the whole team. You noticed and ___.
+
+a) documented the imbalance in contribution  [Formal — decoy]
+
+b) addressed it during the group&apos;s evaluation  [Formal — decoy]
+
+c) ensured credit was fairly distributed  [Formal — decoy]
+
+d) knew exactly who the real MVP was, no cap  [Gen Z — fits]
+
+
+
+d)
+
+Q17. A student panicked mid-presentation and froze. You stepped in and ___.
+
+a) offered a supportive verbal prompt  [Formal — decoy]
+
+b) redirected the discussion to ease the pressure  [Formal — decoy]
+
+c) allowed a brief pause to regain composure  [Formal — decoy]
+
+d) said &quot;you got this, let&apos;s go&quot; and hyped them back up  [Gen Z — fits]
+
+
+
+d)
+
+Q18. Someone submitted work that was clearly copy-pasted. You called it out by ___.
+
+a) requesting a formal resubmission  [Formal — decoy]
+
+b) addressing the academic integrity policy directly  [Formal — decoy]
+
+c) having a private conversation about it  [Formal — decoy]
+
+d) saying &quot;we saw that plot twist coming&quot;  [Gen Z — fits]
+
+
+
+d)
+
+Q19. A quiet student spoke up in class for the first time all semester. You made sure to ___.
+
+a) formally note the shift in participation  [Formal — decoy]
+
+b) encourage continued engagement moving forward  [Formal — decoy]
+
+c) acknowledge the moment without overemphasis  [Formal — decoy]
+
+d) hype it up like a plot twist nobody saw coming  [Gen Z — fits]
+
+
+
+d)
+
+Q20. A student asked for an extension right before the deadline, again. You ___.
+
+a) explained the policy regarding repeated extensions  [Formal — decoy]
+
+b) granted a final extension with clear conditions  [Formal — decoy]
+
+c) addressed the pattern directly and firmly  [Formal — decoy]
+
+d) said &quot;not this time, bestie&quot; and stood firm  [Gen Z — fits]
+
+
+
+d)
+
+
+
+How this set differs from the last version: previously all four options in every question read naturally, so nothing stood out as the &apos;real&apos; answer. Here, three options per question are deliberately formal or HR-brochure-sounding — technically about the right idea, but stiff next to the blank. The fourth (marked Correct, tagged Gen Z) is the one that actually completes the sentence the way someone would say it out loud.
+
+
+
+
+
