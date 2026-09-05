@@ -45,16 +45,17 @@ function wrapText(ctx, text, maxWidth) {
 }
 
 function drawRoundedRect(ctx, x, y, width, height, radius) {
+  const r = Math.min(Math.max(0, radius || 0), width / 2, height / 2);
   ctx.beginPath();
-  ctx.moveTo(x + radius, y);
-  ctx.lineTo(x + width - radius, y);
-  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-  ctx.lineTo(x + width, y + height - radius);
-  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-  ctx.lineTo(x + radius, y + height);
-  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-  ctx.lineTo(x, y + radius);
-  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + width - r, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+  ctx.lineTo(x + width, y + height - r);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+  ctx.lineTo(x + r, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
   ctx.closePath();
 }
 
@@ -237,46 +238,37 @@ export async function renderQuizPageTexture(materialIndex, questionData, questio
       }
     });
 
-let transparent1x1Texture = null;
-
-function getTransparentTexture() {
-  if (transparent1x1Texture) return transparent1x1Texture;
-  if (!window.THREE) return null;
-  const c = document.createElement('canvas');
-  c.width = 2;
-  c.height = 2;
-  const t = new window.THREE.CanvasTexture(c);
-  t.flipY = false;
-  transparent1x1Texture = t;
-  return t;
-}
-
 function applyTextureToMaterial(mat, canvas) {
   if (!mat || !window.THREE) return;
   const canvasTex = new window.THREE.CanvasTexture(canvas);
   canvasTex.flipY = false;
   canvasTex.anisotropy = 8;
   canvasTex.premultiplyAlpha = false;
+  canvasTex.needsUpdate = true;
 
-  const emptyTex = getTransparentTexture();
-
-  mat.map = canvasTex;
-  if (Array.isArray(mat.textures)) {
-    mat.textures[0] = canvasTex;
-    for (let i = 1; i < mat.textures.length; i++) {
-      mat.textures[i] = emptyTex;
-    }
+  if (window.Main && window.Main.maskRevealView && window.Main.maskRevealView.renderer) {
+    try {
+      window.Main.maskRevealView.renderer.initTexture(canvasTex);
+    } catch (_) {}
   }
 
-  // Clear any shader layer uniforms so old illustrations/lines don't blend over canvas
+  mat.map = canvasTex;
+  if (Array.isArray(mat.textures) && mat.textures.length > 0) {
+    mat.textures[0] = canvasTex;
+  }
+
+  // Shift layer offsets offscreen so old art doesn't overlay canvas
   if (mat.userData && mat.userData.shader && mat.userData.shader.uniforms) {
     const u = mat.userData.shader.uniforms;
-    if (u.map) u.map.value = canvasTex;
-    if (u.map2 && emptyTex) u.map2.value = emptyTex;
-    if (u.map3 && emptyTex) u.map3.value = emptyTex;
-    if (u.map4 && emptyTex) u.map4.value = emptyTex;
-    if (u.map5 && emptyTex) u.map5.value = emptyTex;
-    if (u.map6 && emptyTex) u.map6.value = emptyTex;
+    if (u.map) {
+      u.map.value = canvasTex;
+    }
+    const offscreen = new window.THREE.Vector4(99999, 99999, 0.001, 0.001);
+    if (u.map2Dimensions) u.map2Dimensions.value = offscreen;
+    if (u.map3Dimensions) u.map3Dimensions.value = offscreen;
+    if (u.map4Dimensions) u.map4Dimensions.value = offscreen;
+    if (u.map5Dimensions) u.map5Dimensions.value = offscreen;
+    if (u.map6Dimensions) u.map6Dimensions.value = offscreen;
   }
 
   mat.needsUpdate = true;
@@ -570,7 +562,7 @@ export async function renderResultPageTexture(resultData, score, userName, timeT
     const pillY = 295 * scale;
     const pillX = centerX - pillW / 2;
 
-    drawRoundedRect(ctx, pillX, pillY, pillW, pillH, 9999 * scale);
+    drawRoundedRect(ctx, pillX, pillY, pillW, pillH, pillH / 2);
     ctx.fillStyle = '#FFFDF5';
     ctx.fill();
     ctx.lineWidth = 1.5 * scale;
@@ -706,7 +698,7 @@ export async function renderResultPageTexture(resultData, score, userName, timeT
     const btnH = 50 * scale;
     const btnY = H - 90 * scale;
 
-    drawRoundedRect(ctx, centerX - btnW / 2, btnY, btnW, btnH, 9999 * scale);
+    drawRoundedRect(ctx, centerX - btnW / 2, btnY, btnW, btnH, btnH / 2);
     ctx.fillStyle = '#FBBF24';
     ctx.fill();
     ctx.lineWidth = 2.5 * scale;
