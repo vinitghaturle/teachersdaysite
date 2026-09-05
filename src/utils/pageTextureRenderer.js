@@ -318,14 +318,61 @@ export async function renderQuizPageTexture(materialIndex, questionData, questio
   }
 }
 
+export const DEFAULT_PAGE8_SETTINGS = {
+  // Theme & Atmosphere
+  bgTheme: 'sunshine', // 'sunshine' | 'vanilla' | 'mint' | 'rose' | 'lavender'
+  showDoodles: true,
+  showSparkles: true,
+  showBooks: true,
+  showSpineCrease: true,
+  
+  // Left Page
+  headerTag: '🎓  TEACHERS\' DAY SPECIAL EDITION  🎓',
+  resultTitle: 'Your Result ✨',
+  titleFontSize: 50,
+  teacherPrefix: '',
+  customBadgeText: '', // Empty = use resultData.label
+  badgeColor: '#FDE047',
+  badgeFontSize: 48,
+  customDescText: '',
+  descFontSize: 20,
+  scoreOverride: -1, // -1 = use real score, 0..5 = override
+  statsPillScale: 1.0,
+
+  // Right Page
+  postItAngle: 0.06,
+  postItLine1: 'Great Teachers',
+  postItLine2: 'Make a',
+  postItLine3: 'Bigger World',
+  postItEmoji: '♡',
+  sectionTitle: 'YOUR PERFORMANCE TIERS',
+  tierCardHeight: 108,
+  tierCardGap: 16,
+  tierCardFontSize: 15,
+  playAgainBtnText: 'Play Again ↺',
+  playAgainBtnColor: '#FBBF24',
+  bottomRightNote: 'Thank you for shaping tomorrow ♡',
+};
+
+const THEME_PALETTES = {
+  sunshine: ['#FFFDF8', '#FEFCE8', '#FEF9C3', '#FDE68A'],
+  vanilla: ['#FFFDF9', '#FFFBF0', '#FEF6E4', '#F8E7BE'],
+  mint: ['#F0FDF4', '#ECFDF5', '#D1FAE5', '#A7F3D0'],
+  rose: ['#FFF1F2', '#FFE4E6', '#FECDD3', '#FDA4AF'],
+  lavender: ['#FAF5FF', '#F3E8FF', '#E9D5FF', '#D8B4FE'],
+};
+
 /**
  * Render the Page 8 Score & Compliment directly onto the 3D Page 8 texture
- * Embedded across the 2-page open book spread
+ * Embedded across the 2-page open book spread with live customizable controls
  */
-export async function renderResultPageTexture(resultData, score, userName, timeTaken = '00 : 45') {
+export async function renderResultPageTexture(resultData, score, userName, timeTaken = '00 : 45', customSettings = {}) {
   const materialIndex = 7; // Page 8 is index 7
   const bgSrc = PAGE_BG_MAP[materialIndex];
   if (!bgSrc) return;
+
+  const cfg = { ...DEFAULT_PAGE8_SETTINGS, ...customSettings };
+  const effectiveScore = (cfg.scoreOverride >= 0 && cfg.scoreOverride <= 5) ? cfg.scoreOverride : score;
 
   try {
     const bgImg = await loadImage(bgSrc);
@@ -336,34 +383,38 @@ export async function renderResultPageTexture(resultData, score, userName, timeT
     const W = canvas.width;
     const H = canvas.height;
 
-    // 1. Base background: warm luxury paper theme matching Teachers Day Special
+    // 1. Base background: theme gradient matching Teachers Day Special
+    const themeColors = THEME_PALETTES[cfg.bgTheme] || THEME_PALETTES.sunshine;
     const bgGrad = ctx.createLinearGradient(0, 0, W, H);
-    bgGrad.addColorStop(0, '#FFFDF8');
-    bgGrad.addColorStop(0.3, '#FEFCE8');
-    bgGrad.addColorStop(0.7, '#FEF9C3');
-    bgGrad.addColorStop(1, '#FDE68A');
+    bgGrad.addColorStop(0, themeColors[0]);
+    bgGrad.addColorStop(0.3, themeColors[1]);
+    bgGrad.addColorStop(0.7, themeColors[2]);
+    bgGrad.addColorStop(1, themeColors[3]);
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, W, H);
 
     // Light subtle texture overlay
-    ctx.globalAlpha = 0.09;
+    ctx.globalAlpha = 0.08;
     ctx.drawImage(bgImg, 0, 0, W, H);
     ctx.globalAlpha = 1.0;
 
     // Spine Center Crease & Soft Gradient (x: 1040 to 1060)
-    const spineGrad = ctx.createLinearGradient(W * 0.48, 0, W * 0.52, 0);
-    spineGrad.addColorStop(0, 'rgba(0,0,0,0)');
-    spineGrad.addColorStop(0.48, 'rgba(0,0,0,0.06)');
-    spineGrad.addColorStop(0.5, 'rgba(0,0,0,0.12)');
-    spineGrad.addColorStop(0.52, 'rgba(0,0,0,0.06)');
-    spineGrad.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = spineGrad;
-    ctx.fillRect(W * 0.47, 0, W * 0.06, H);
+    if (cfg.showSpineCrease) {
+      const spineGrad = ctx.createLinearGradient(W * 0.48, 0, W * 0.52, 0);
+      spineGrad.addColorStop(0, 'rgba(0,0,0,0)');
+      spineGrad.addColorStop(0.48, 'rgba(0,0,0,0.06)');
+      spineGrad.addColorStop(0.5, 'rgba(0,0,0,0.12)');
+      spineGrad.addColorStop(0.52, 'rgba(0,0,0,0.06)');
+      spineGrad.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = spineGrad;
+      ctx.fillRect(W * 0.47, 0, W * 0.06, H);
+    }
 
     const scale = W / 2100;
 
     // Helper functions for custom hand-drawn flourishes
     const drawDoodleRays = (cx, cy, r, len, count, startAngle, endAngle, color = '#EAB308', width = 3 * scale) => {
+      if (!cfg.showDoodles) return;
       ctx.save();
       ctx.strokeStyle = color;
       ctx.lineWidth = width;
@@ -384,6 +435,7 @@ export async function renderResultPageTexture(resultData, score, userName, timeT
     };
 
     const drawSparkle = (cx, cy, size, color = '#F59E0B') => {
+      if (!cfg.showSparkles) return;
       ctx.save();
       ctx.fillStyle = color;
       ctx.beginPath();
@@ -397,6 +449,7 @@ export async function renderResultPageTexture(resultData, score, userName, timeT
     };
 
     const drawDotGrid = (startX, startY, cols, rows, spacing, radius = 3 * scale, color = '#F59E0B') => {
+      if (!cfg.showDoodles) return;
       ctx.save();
       ctx.fillStyle = color;
       for (let r = 0; r < rows; r++) {
@@ -425,63 +478,66 @@ export async function renderResultPageTexture(resultData, score, userName, timeT
     const leftMidX = 525 * scale;
 
     // Top-Left Yellow Corner Wave
-    ctx.save();
-    ctx.fillStyle = '#FDE047';
-    ctx.strokeStyle = '#0F172A';
-    ctx.lineWidth = 3.5 * scale;
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(240 * scale, 0);
-    ctx.bezierCurveTo(220 * scale, 130 * scale, 130 * scale, 190 * scale, 0, 250 * scale);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-    ctx.restore();
+    if (cfg.showDoodles) {
+      ctx.save();
+      ctx.fillStyle = cfg.badgeColor || '#FDE047';
+      ctx.strokeStyle = '#0F172A';
+      ctx.lineWidth = 3.5 * scale;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(240 * scale, 0);
+      ctx.bezierCurveTo(220 * scale, 130 * scale, 130 * scale, 190 * scale, 0, 250 * scale);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
 
-    // Sparkles on Left
-    drawSparkle(260 * scale, 70 * scale, 12 * scale, '#F59E0B');
-    drawSparkle(90 * scale, 280 * scale, 8 * scale, '#EAB308');
-    drawSparkle(940 * scale, 120 * scale, 10 * scale, '#14B8A6');
+      // Sparkles on Left
+      drawSparkle(260 * scale, 70 * scale, 12 * scale, '#F59E0B');
+      drawSparkle(90 * scale, 280 * scale, 8 * scale, '#EAB308');
+      drawSparkle(940 * scale, 120 * scale, 10 * scale, '#14B8A6');
 
-    // Top-Left Dot Grid
-    drawDotGrid(50 * scale, 290 * scale, 6, 4, 18 * scale, 3 * scale, '#F59E0B');
+      // Top-Left Dot Grid
+      drawDotGrid(50 * scale, 290 * scale, 6, 4, 18 * scale, 3 * scale, '#F59E0B');
 
-    // Left Side Doodle: "Good Teachers Brighter Tomorrows ♡"
-    ctx.save();
-    ctx.font = `700 ${22 * scale}px "Caveat", "Comic Sans MS", cursive, sans-serif`;
-    ctx.fillStyle = '#1E293B';
-    ctx.textAlign = 'left';
-    ctx.fillText('Good Teachers', 60 * scale, 420 * scale);
-    ctx.fillText('Brighter Tomorrows ♡', 60 * scale, 452 * scale);
-    drawDoodleRays(300 * scale, 415 * scale, 8 * scale, 14 * scale, 3, -0.4, 0.4, '#EAB308');
-    ctx.restore();
+      // Left Side Doodle: "Good Teachers Brighter Tomorrows ♡"
+      ctx.save();
+      ctx.font = `700 ${22 * scale}px "Caveat", "Comic Sans MS", cursive, sans-serif`;
+      ctx.fillStyle = '#1E293B';
+      ctx.textAlign = 'left';
+      ctx.fillText('Good Teachers', 60 * scale, 420 * scale);
+      ctx.fillText('Brighter Tomorrows ♡', 60 * scale, 452 * scale);
+      drawDoodleRays(300 * scale, 415 * scale, 8 * scale, 14 * scale, 3, -0.4, 0.4, '#EAB308');
+      ctx.restore();
+    }
 
     // Top Banner Capsule: — 🎓 TEACHERS' DAY SPECIAL EDITION —
-    const bannerText = '🎓  TEACHERS\' DAY SPECIAL EDITION  🎓';
-    ctx.font = `800 ${14 * scale}px sans-serif`;
-    const bannerW = ctx.measureText(bannerText).width + 36 * scale;
-    const bannerH = 32 * scale;
-    const bannerY = 70 * scale;
-    const bannerX = leftMidX - bannerW / 2;
+    if (cfg.headerTag) {
+      ctx.font = `800 ${14 * scale}px sans-serif`;
+      const bannerW = ctx.measureText(cfg.headerTag).width + 36 * scale;
+      const bannerH = 32 * scale;
+      const bannerY = 70 * scale;
+      const bannerX = leftMidX - bannerW / 2;
 
-    drawRoundedRect(ctx, bannerX, bannerY, bannerW, bannerH, 16 * scale);
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fill();
-    ctx.lineWidth = 2 * scale;
-    ctx.strokeStyle = '#0F172A';
-    ctx.stroke();
+      drawRoundedRect(ctx, bannerX, bannerY, bannerW, bannerH, 16 * scale);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fill();
+      ctx.lineWidth = 2 * scale;
+      ctx.strokeStyle = '#0F172A';
+      ctx.stroke();
 
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = '#475569';
-    ctx.fillText(bannerText, leftMidX, bannerY + bannerH / 2);
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#475569';
+      ctx.fillText(cfg.headerTag, leftMidX, bannerY + bannerH / 2);
+    }
 
     // "Your Result" with Sunshine Rays
-    ctx.font = `700 ${50 * scale}px "Caveat", "Playpen Sans", cursive, sans-serif`;
-    drawStrokedText('Your Result ✨', leftMidX, 155 * scale, '#FFFFFF', '#0F172A', 5 * scale);
+    ctx.font = `700 ${cfg.titleFontSize * scale}px "Caveat", "Playpen Sans", cursive, sans-serif`;
+    drawStrokedText(cfg.resultTitle || 'Your Result ✨', leftMidX, 155 * scale, '#FFFFFF', '#0F172A', 5 * scale);
     
     // Rays beside "Your Result"
-    const yrW = ctx.measureText('Your Result ✨').width;
+    const yrW = ctx.measureText(cfg.resultTitle || 'Your Result ✨').width;
     drawDoodleRays(leftMidX - yrW / 2 - 20 * scale, 155 * scale, 10 * scale, 18 * scale, 3, Math.PI * 0.75, Math.PI * 1.25, '#EAB308');
     drawDoodleRays(leftMidX + yrW / 2 + 20 * scale, 155 * scale, 10 * scale, 18 * scale, 3, -Math.PI * 0.25, Math.PI * 0.25, '#EAB308');
 
@@ -497,12 +553,15 @@ export async function renderResultPageTexture(resultData, score, userName, timeT
     // Headline: "You're a"
     ctx.font = `800 ${36 * scale}px sans-serif`;
     ctx.textAlign = 'center';
-    const teacherPrefix = userName ? `${userName}, You're a` : "You're a";
-    drawStrokedText(teacherPrefix, leftMidX, 255 * scale, '#FFFFFF', '#0F172A', 4 * scale);
+    let teacherHeadline = cfg.teacherPrefix;
+    if (!teacherHeadline) {
+      teacherHeadline = userName ? `${userName}, You're a` : "You're a";
+    }
+    drawStrokedText(teacherHeadline, leftMidX, 255 * scale, '#FFFFFF', '#0F172A', 4 * scale);
 
     // Yellow Highlighter Box for Tier Label
-    const tierLabel = `${resultData.label}!`;
-    ctx.font = `900 ${48 * scale}px sans-serif`;
+    const tierLabel = cfg.customBadgeText ? `${cfg.customBadgeText}!` : `${resultData.label}!`;
+    ctx.font = `900 ${cfg.badgeFontSize * scale}px sans-serif`;
     const tierTextW = ctx.measureText(tierLabel).width;
     const badgeW = Math.max(420 * scale, tierTextW + 70 * scale);
     const badgeH = 76 * scale;
@@ -516,7 +575,7 @@ export async function renderResultPageTexture(resultData, score, userName, timeT
 
     // Badge front
     drawRoundedRect(ctx, badgeX, badgeY, badgeW, badgeH, 18 * scale);
-    ctx.fillStyle = '#FDE047';
+    ctx.fillStyle = cfg.badgeColor || '#FDE047';
     ctx.fill();
     ctx.lineWidth = 3.5 * scale;
     ctx.strokeStyle = '#0F172A';
@@ -528,25 +587,27 @@ export async function renderResultPageTexture(resultData, score, userName, timeT
     ctx.fillText(tierLabel, leftMidX, badgeY + badgeH / 2);
 
     // Subtitle Description
-    ctx.font = `600 ${20 * scale}px sans-serif`;
-    const descLines = wrapText(ctx, resultData.desc || resultData.message, 660 * scale);
+    ctx.font = `600 ${cfg.descFontSize * scale}px sans-serif`;
+    const descText = cfg.customDescText || resultData.desc || resultData.message;
+    const descLines = wrapText(ctx, descText, 660 * scale);
     descLines.forEach((l, idx) => {
       drawStrokedText(l, leftMidX, 412 * scale + idx * 28 * scale, '#FFFFFF', '#334155', 3.5 * scale);
     });
 
     // Center Stats Pill (Score + Time Taken)
-    const pillW = 560 * scale;
-    const pillH = 92 * scale;
+    const pScale = cfg.statsPillScale || 1.0;
+    const pillW = 560 * scale * pScale;
+    const pillH = 92 * scale * pScale;
     const pillY = 500 * scale;
     const pillX = leftMidX - pillW / 2;
 
     // Shadow for Pill
-    drawRoundedRect(ctx, pillX + 3 * scale, pillY + 4 * scale, pillW, pillH, 46 * scale);
+    drawRoundedRect(ctx, pillX + 3 * scale, pillY + 4 * scale, pillW, pillH, 46 * scale * pScale);
     ctx.fillStyle = 'rgba(15, 23, 42, 0.12)';
     ctx.fill();
 
     // Pill Body
-    drawRoundedRect(ctx, pillX, pillY, pillW, pillH, 46 * scale);
+    drawRoundedRect(ctx, pillX, pillY, pillW, pillH, 46 * scale * pScale);
     ctx.fillStyle = '#FFFFFF';
     ctx.fill();
     ctx.lineWidth = 3 * scale;
@@ -555,103 +616,105 @@ export async function renderResultPageTexture(resultData, score, userName, timeT
 
     // Left Stat: Final Score
     const pillCenterY = pillY + pillH / 2;
-    const leftStatX = pillX + 54 * scale;
+    const leftStatX = pillX + 54 * scale * pScale;
 
     // Star / Trophy Circle
     ctx.beginPath();
-    ctx.arc(leftStatX + 24 * scale, pillCenterY, 28 * scale, 0, Math.PI * 2);
+    ctx.arc(leftStatX + 24 * scale * pScale, pillCenterY, 28 * scale * pScale, 0, Math.PI * 2);
     ctx.fillStyle = '#FBBF24';
     ctx.fill();
     ctx.lineWidth = 2.5 * scale;
     ctx.strokeStyle = '#0F172A';
     ctx.stroke();
 
-    ctx.font = `900 ${26 * scale}px sans-serif`;
+    ctx.font = `900 ${26 * scale * pScale}px sans-serif`;
     ctx.fillStyle = '#0F172A';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('🏆', leftStatX + 24 * scale, pillCenterY);
+    ctx.fillText('🏆', leftStatX + 24 * scale * pScale, pillCenterY);
 
     // Score text
     ctx.textAlign = 'left';
-    ctx.font = `800 ${14 * scale}px sans-serif`;
+    ctx.font = `800 ${14 * scale * pScale}px sans-serif`;
     ctx.fillStyle = '#64748B';
-    ctx.fillText('FINAL SCORE', leftStatX + 66 * scale, pillCenterY - 14 * scale);
-    ctx.font = `900 ${30 * scale}px sans-serif`;
+    ctx.fillText('FINAL SCORE', leftStatX + 66 * scale * pScale, pillCenterY - 14 * scale * pScale);
+    ctx.font = `900 ${30 * scale * pScale}px sans-serif`;
     ctx.fillStyle = '#0F172A';
-    ctx.fillText(`${score} / 5`, leftStatX + 66 * scale, pillCenterY + 16 * scale);
+    ctx.fillText(`${effectiveScore} / 5`, leftStatX + 66 * scale * pScale, pillCenterY + 16 * scale * pScale);
 
     // Divider Line in Pill
     ctx.beginPath();
-    ctx.moveTo(leftMidX, pillY + 16 * scale);
-    ctx.lineTo(leftMidX, pillY + pillH - 16 * scale);
+    ctx.moveTo(leftMidX, pillY + 16 * scale * pScale);
+    ctx.lineTo(leftMidX, pillY + pillH - 16 * scale * pScale);
     ctx.lineWidth = 2 * scale;
     ctx.strokeStyle = '#E2E8F0';
     ctx.stroke();
 
     // Right Stat: Time Taken
-    const rightStatX = leftMidX + 54 * scale;
+    const rightStatX = leftMidX + 54 * scale * pScale;
 
     // Clock Circle
     ctx.beginPath();
-    ctx.arc(rightStatX + 24 * scale, pillCenterY, 28 * scale, 0, Math.PI * 2);
+    ctx.arc(rightStatX + 24 * scale * pScale, pillCenterY, 28 * scale * pScale, 0, Math.PI * 2);
     ctx.fillStyle = '#2DD4BF';
     ctx.fill();
     ctx.lineWidth = 2.5 * scale;
     ctx.strokeStyle = '#0F172A';
     ctx.stroke();
 
-    ctx.font = `900 ${24 * scale}px sans-serif`;
+    ctx.font = `900 ${24 * scale * pScale}px sans-serif`;
     ctx.fillStyle = '#0F172A';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('⏱', rightStatX + 24 * scale, pillCenterY);
+    ctx.fillText('⏱', rightStatX + 24 * scale * pScale, pillCenterY);
 
     // Time text
     ctx.textAlign = 'left';
-    ctx.font = `800 ${14 * scale}px sans-serif`;
+    ctx.font = `800 ${14 * scale * pScale}px sans-serif`;
     ctx.fillStyle = '#64748B';
-    ctx.fillText('TIME TAKEN', rightStatX + 66 * scale, pillCenterY - 14 * scale);
-    ctx.font = `900 ${30 * scale}px sans-serif`;
+    ctx.fillText('TIME TAKEN', rightStatX + 66 * scale * pScale, pillCenterY - 14 * scale * pScale);
+    ctx.font = `900 ${30 * scale * pScale}px sans-serif`;
     ctx.fillStyle = '#0F172A';
-    ctx.fillText(timeTaken, rightStatX + 66 * scale, pillCenterY + 16 * scale);
+    ctx.fillText(timeTaken, rightStatX + 66 * scale * pScale, pillCenterY + 16 * scale * pScale);
 
     // Bottom Left 3 Stacked Books with Spine Details
-    ctx.save();
-    const bookX = 80 * scale;
-    const bookBaseY = 880 * scale;
-    const bookW = 260 * scale;
-    const bookH = 46 * scale;
+    if (cfg.showBooks) {
+      ctx.save();
+      const bookX = 80 * scale;
+      const bookBaseY = 880 * scale;
+      const bookW = 260 * scale;
+      const bookH = 46 * scale;
 
-    const books = [
-      { name: 'Impact ✦', bg: '#FFFFFF', text: '#0F172A', yOff: 2 * bookH },
-      { name: 'Kindness ♡', bg: '#FBBF24', text: '#0F172A', yOff: 1 * bookH },
-      { name: 'Curiosity 💡', bg: '#2DD4BF', text: '#0F172A', yOff: 0 },
-    ];
+      const books = [
+        { name: 'Impact ✦', bg: '#FFFFFF', text: '#0F172A', yOff: 2 * bookH },
+        { name: 'Kindness ♡', bg: '#FBBF24', text: '#0F172A', yOff: 1 * bookH },
+        { name: 'Curiosity 💡', bg: '#2DD4BF', text: '#0F172A', yOff: 0 },
+      ];
 
-    books.forEach((b) => {
-      const by = bookBaseY + b.yOff;
-      drawRoundedRect(ctx, bookX, by, bookW, bookH - 4 * scale, 8 * scale);
-      ctx.fillStyle = b.bg;
-      ctx.fill();
-      ctx.lineWidth = 2.5 * scale;
-      ctx.strokeStyle = '#0F172A';
-      ctx.stroke();
+      books.forEach((b) => {
+        const by = bookBaseY + b.yOff;
+        drawRoundedRect(ctx, bookX, by, bookW, bookH - 4 * scale, 8 * scale);
+        ctx.fillStyle = b.bg;
+        ctx.fill();
+        ctx.lineWidth = 2.5 * scale;
+        ctx.strokeStyle = '#0F172A';
+        ctx.stroke();
 
-      // Spine line
-      ctx.beginPath();
-      ctx.moveTo(bookX + 36 * scale, by);
-      ctx.lineTo(bookX + 36 * scale, by + bookH - 4 * scale);
-      ctx.stroke();
+        // Spine line
+        ctx.beginPath();
+        ctx.moveTo(bookX + 36 * scale, by);
+        ctx.lineTo(bookX + 36 * scale, by + bookH - 4 * scale);
+        ctx.stroke();
 
-      // Book Name
-      ctx.font = `800 ${18 * scale}px sans-serif`;
-      ctx.fillStyle = b.text;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(b.name, bookX + bookW / 2 + 16 * scale, by + bookH / 2 - 2 * scale);
-    });
-    ctx.restore();
+        // Book Name
+        ctx.font = `800 ${18 * scale}px sans-serif`;
+        ctx.fillStyle = b.text;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(b.name, bookX + bookW / 2 + 16 * scale, by + bookH / 2 - 2 * scale);
+      });
+      ctx.restore();
+    }
 
     // ==============================================================
     // RIGHT SPREAD (x: 1050 to 2100) — TIER CARDS & POST-IT & PLAY AGAIN
@@ -659,62 +722,66 @@ export async function renderResultPageTexture(resultData, score, userName, timeT
     const rightMidX = 1575 * scale;
 
     // Top-Right Sticky Note (Post-it) with Shadow & Washi Tape
-    ctx.save();
-    const postX = W - 330 * scale;
-    const postY = 55 * scale;
-    const postW = 250 * scale;
-    const postH = 195 * scale;
-    ctx.translate(postX + postW / 2, postY + postH / 2);
-    ctx.rotate(0.06);
+    if (cfg.showDoodles && (cfg.postItLine1 || cfg.postItLine2 || cfg.postItLine3)) {
+      ctx.save();
+      const postX = W - 330 * scale;
+      const postY = 55 * scale;
+      const postW = 250 * scale;
+      const postH = 195 * scale;
+      ctx.translate(postX + postW / 2, postY + postH / 2);
+      ctx.rotate(cfg.postItAngle || 0.06);
 
-    // Sticky Shadow
-    drawRoundedRect(ctx, -postW / 2 + 4 * scale, -postH / 2 + 5 * scale, postW, postH, 10 * scale);
-    ctx.fillStyle = 'rgba(0,0,0,0.12)';
-    ctx.fill();
+      // Sticky Shadow
+      drawRoundedRect(ctx, -postW / 2 + 4 * scale, -postH / 2 + 5 * scale, postW, postH, 10 * scale);
+      ctx.fillStyle = 'rgba(0,0,0,0.12)';
+      ctx.fill();
 
-    // Sticky Note Body
-    drawRoundedRect(ctx, -postW / 2, -postH / 2, postW, postH, 10 * scale);
-    ctx.fillStyle = '#FEF08A';
-    ctx.fill();
-    ctx.lineWidth = 2.5 * scale;
-    ctx.strokeStyle = '#0F172A';
-    ctx.stroke();
+      // Sticky Note Body
+      drawRoundedRect(ctx, -postW / 2, -postH / 2, postW, postH, 10 * scale);
+      ctx.fillStyle = '#FEF08A';
+      ctx.fill();
+      ctx.lineWidth = 2.5 * scale;
+      ctx.strokeStyle = '#0F172A';
+      ctx.stroke();
 
-    // Teal Tape
-    drawRoundedRect(ctx, -45 * scale, -postH / 2 - 14 * scale, 90 * scale, 26 * scale, 4 * scale);
-    ctx.fillStyle = '#2DD4BF';
-    ctx.fill();
-    ctx.lineWidth = 2 * scale;
-    ctx.strokeStyle = '#0F172A';
-    ctx.stroke();
+      // Teal Tape
+      drawRoundedRect(ctx, -45 * scale, -postH / 2 - 14 * scale, 90 * scale, 26 * scale, 4 * scale);
+      ctx.fillStyle = '#2DD4BF';
+      ctx.fill();
+      ctx.lineWidth = 2 * scale;
+      ctx.strokeStyle = '#0F172A';
+      ctx.stroke();
 
-    // Text inside Sticky Note
-    ctx.font = `700 ${22 * scale}px "Caveat", "Comic Sans MS", cursive, sans-serif`;
-    ctx.fillStyle = '#0F172A';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('Great Teachers', 0, -42 * scale);
-    ctx.fillText('Make a', 0, -12 * scale);
-    ctx.fillText('Bigger World', 0, 18 * scale);
-    ctx.fillText('♡', 0, 52 * scale);
-    ctx.restore();
+      // Text inside Sticky Note
+      ctx.font = `700 ${22 * scale}px "Caveat", "Comic Sans MS", cursive, sans-serif`;
+      ctx.fillStyle = '#0F172A';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      if (cfg.postItLine1) ctx.fillText(cfg.postItLine1, 0, -42 * scale);
+      if (cfg.postItLine2) ctx.fillText(cfg.postItLine2, 0, -12 * scale);
+      if (cfg.postItLine3) ctx.fillText(cfg.postItLine3, 0, 18 * scale);
+      if (cfg.postItEmoji) ctx.fillText(cfg.postItEmoji, 0, 52 * scale);
+      ctx.restore();
+    }
 
     // Section Title: "SCORE BREAKDOWN & TIERS"
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.font = `800 ${22 * scale}px sans-serif`;
-    drawStrokedText("YOUR PERFORMANCE TIERS", rightMidX - 60 * scale, 95 * scale, '#FFFFFF', '#0F172A', 3.5 * scale);
+    if (cfg.sectionTitle) {
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = `800 ${22 * scale}px sans-serif`;
+      drawStrokedText(cfg.sectionTitle, rightMidX - 60 * scale, 95 * scale, '#FFFFFF', '#0F172A', 3.5 * scale);
+    }
 
     // 5 Tier Breakdown Stacked Cards
     const tierCardW = 780 * scale;
-    const tierCardH = 108 * scale;
-    const tierCardGap = 16 * scale;
+    const tierCardH = (cfg.tierCardHeight || 108) * scale;
+    const tierCardGap = (cfg.tierCardGap || 16) * scale;
     const tierCardStartY = 140 * scale;
     const tierCardX = rightMidX - tierCardW / 2;
 
     SCORE_TIERS.forEach((tierObj, idx) => {
       const cy = tierCardStartY + idx * (tierCardH + tierCardGap);
-      const isCurrentTier = score >= tierObj.minScore && score <= tierObj.maxScore;
+      const isCurrentTier = effectiveScore >= tierObj.minScore && effectiveScore <= tierObj.maxScore;
 
       // Card Drop Shadow
       if (isCurrentTier) {
@@ -752,7 +819,7 @@ export async function renderResultPageTexture(resultData, score, userName, timeT
       const iconCircleY = cy + tierCardH / 2;
       ctx.beginPath();
       ctx.arc(iconCircleX, iconCircleY, 34 * scale, 0, Math.PI * 2);
-      ctx.fillStyle = isCurrentTier ? '#FDE047' : '#F1F5F9';
+      ctx.fillStyle = isCurrentTier ? (cfg.badgeColor || '#FDE047') : '#F1F5F9';
       ctx.fill();
       ctx.lineWidth = isCurrentTier ? 2.5 * scale : 1.5 * scale;
       ctx.strokeStyle = '#0F172A';
@@ -767,14 +834,14 @@ export async function renderResultPageTexture(resultData, score, userName, timeT
       const contentLeftX = tierCardX + 115 * scale;
 
       // Tier Name Badge Pill
-      ctx.font = `900 ${15 * scale}px sans-serif`;
+      ctx.font = `900 ${cfg.tierCardFontSize * scale}px sans-serif`;
       const titleW = ctx.measureText(tierObj.label).width;
       const titlePillW = titleW + 28 * scale;
       const titlePillH = 30 * scale;
       const titlePillY = cy + 18 * scale;
 
       drawRoundedRect(ctx, contentLeftX, titlePillY, titlePillW, titlePillH, 15 * scale);
-      ctx.fillStyle = isCurrentTier ? '#FDE047' : '#FEF3C7';
+      ctx.fillStyle = isCurrentTier ? (cfg.badgeColor || '#FDE047') : '#FEF3C7';
       ctx.fill();
       ctx.lineWidth = 1.5 * scale;
       ctx.strokeStyle = '#0F172A';
@@ -814,23 +881,25 @@ export async function renderResultPageTexture(resultData, score, userName, timeT
     });
 
     // Bottom-Right Yellow Corner Wave & Note
-    ctx.save();
-    ctx.fillStyle = '#FDE047';
-    ctx.strokeStyle = '#0F172A';
-    ctx.lineWidth = 3.5 * scale;
-    ctx.beginPath();
-    ctx.moveTo(W, H - 250 * scale);
-    ctx.bezierCurveTo(W - 140 * scale, H - 200 * scale, W - 220 * scale, H - 120 * scale, W - 290 * scale, H);
-    ctx.lineTo(W, H);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
+    if (cfg.showDoodles && cfg.bottomRightNote) {
+      ctx.save();
+      ctx.fillStyle = cfg.badgeColor || '#FDE047';
+      ctx.strokeStyle = '#0F172A';
+      ctx.lineWidth = 3.5 * scale;
+      ctx.beginPath();
+      ctx.moveTo(W, H - 250 * scale);
+      ctx.bezierCurveTo(W - 140 * scale, H - 200 * scale, W - 220 * scale, H - 120 * scale, W - 290 * scale, H);
+      ctx.lineTo(W, H);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
 
-    ctx.font = `700 ${22 * scale}px "Caveat", "Comic Sans MS", cursive, sans-serif`;
-    ctx.fillStyle = '#0F172A';
-    ctx.textAlign = 'center';
-    ctx.fillText('Thank you for shaping tomorrow ♡', W - 150 * scale, H - 42 * scale);
-    ctx.restore();
+      ctx.font = `700 ${22 * scale}px "Caveat", "Comic Sans MS", cursive, sans-serif`;
+      ctx.fillStyle = '#0F172A';
+      ctx.textAlign = 'center';
+      ctx.fillText(cfg.bottomRightNote, W - 150 * scale, H - 42 * scale);
+      ctx.restore();
+    }
 
     // Play Again CTA Button on Right Page
     const btnW = 360 * scale;
@@ -845,7 +914,7 @@ export async function renderResultPageTexture(resultData, score, userName, timeT
 
     // Button Body
     drawRoundedRect(ctx, btnX, btnY, btnW, btnH, 36 * scale);
-    ctx.fillStyle = '#FBBF24';
+    ctx.fillStyle = cfg.playAgainBtnColor || '#FBBF24';
     ctx.fill();
     ctx.lineWidth = 3 * scale;
     ctx.strokeStyle = '#0F172A';
@@ -855,7 +924,7 @@ export async function renderResultPageTexture(resultData, score, userName, timeT
     ctx.fillStyle = '#0F172A';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('Play Again ↺', rightMidX, btnY + btnH / 2);
+    ctx.fillText(cfg.playAgainBtnText || 'Play Again ↺', rightMidX, btnY + btnH / 2);
 
     // Rays beside Play Again
     drawDoodleRays(btnX - 18 * scale, btnY + btnH / 2, 10 * scale, 18 * scale, 3, Math.PI * 0.75, Math.PI * 1.25, '#EAB308');
@@ -912,5 +981,13 @@ export async function renderAllQuizTextures(questions, answers, score, userName,
   }
 
   // Render Page 8 with total final score and Teachers Day Special layout
-  await renderResultPageTexture(resultData, score, userName, timeTaken);
+  let customSettings = {};
+  try {
+    if (typeof localStorage !== 'undefined') {
+      const saved = localStorage.getItem('htwkr_page8_ui_settings');
+      if (saved) customSettings = JSON.parse(saved);
+    }
+  } catch (_) {}
+
+  await renderResultPageTexture(resultData, score, userName, timeTaken, customSettings);
 }

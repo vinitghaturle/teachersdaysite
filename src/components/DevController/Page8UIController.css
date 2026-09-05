@@ -1,0 +1,318 @@
+/* Page 8 UI Controller Drawer Styles */
+
+.p8-dev-wrapper {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999999 !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  pointer-events: auto !important;
+  user-select: none;
+}
+
+/* Floating Toggle Button */
+.p8-dev-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #0F172A;
+  color: #F8FAFC;
+  border: 2px solid #FDE047;
+  border-radius: 9999px;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(253, 224, 71, 0.4);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.p8-dev-toggle-btn:hover {
+  background: #1E293B;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), 0 0 0 2px #FDE047;
+}
+
+.p8-dev-toggle-btn.active {
+  background: #FDE047;
+  color: #0F172A;
+  border-color: #0F172A;
+}
+
+.p8-dev-gear {
+  font-size: 16px;
+  animation: p8GearSpin 8s linear infinite;
+}
+
+@keyframes p8GearSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Drawer Card */
+.p8-dev-drawer {
+  position: absolute;
+  top: 52px;
+  right: 0;
+  width: 380px;
+  max-width: 90vw;
+  max-height: 82vh;
+  background: #FFFFFF;
+  border: 2.5px solid #0F172A;
+  border-radius: 20px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: p8DrawerSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes p8DrawerSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Drawer Header */
+.p8-dev-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: #0F172A;
+  color: #FFFFFF;
+}
+
+.p8-dev-header h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.p8-dev-close-btn {
+  background: transparent;
+  border: none;
+  color: #94A3B8;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+.p8-dev-close-btn:hover {
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Tabs Bar */
+.p8-dev-tabs {
+  display: flex;
+  border-bottom: 1.5px solid #E2E8F0;
+  background: #F8FAFC;
+}
+
+.p8-dev-tab-btn {
+  flex: 1;
+  padding: 10px 6px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #64748B;
+  background: transparent;
+  border: none;
+  border-bottom: 2.5px solid transparent;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.p8-dev-tab-btn:hover {
+  color: #0F172A;
+  background: #F1F5F9;
+}
+
+.p8-dev-tab-btn.active {
+  color: #0F172A;
+  border-bottom-color: #F59E0B;
+  background: #FFFFFF;
+}
+
+/* Body / Form Content */
+.p8-dev-body {
+  padding: 16px 18px;
+  overflow-y: auto;
+  max-height: calc(82vh - 170px);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Form Fields */
+.p8-dev-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.p8-dev-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.p8-dev-label-row strong {
+  color: #0F172A;
+  font-weight: 800;
+}
+
+.p8-dev-input,
+.p8-dev-textarea {
+  width: 100%;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #0F172A;
+  background: #F8FAFC;
+  border: 1.5px solid #CBD5E1;
+  border-radius: 8px;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.p8-dev-input:focus,
+.p8-dev-textarea:focus {
+  border-color: #0F172A;
+  background: #FFFFFF;
+}
+
+.p8-dev-textarea {
+  resize: vertical;
+  min-height: 48px;
+}
+
+.p8-dev-slider {
+  width: 100%;
+  cursor: pointer;
+  accent-color: #0F172A;
+}
+
+/* Theme Presets Row */
+.p8-dev-presets-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+
+.p8-dev-preset-btn {
+  padding: 6px 2px;
+  font-size: 10px;
+  font-weight: 800;
+  border-radius: 6px;
+  border: 1.5px solid #CBD5E1;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s ease;
+}
+
+.p8-dev-preset-btn.active {
+  border-color: #0F172A;
+  box-shadow: 0 0 0 2px #0F172A;
+  transform: translateY(-1px);
+}
+
+/* Swatches */
+.p8-dev-swatches {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.p8-dev-swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid #0F172A;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.p8-dev-swatch:hover {
+  transform: scale(1.15);
+}
+
+.p8-dev-swatch.active {
+  box-shadow: 0 0 0 2px #0F172A, 0 0 0 4px #FBBF24;
+}
+
+/* Checkbox Toggle Row */
+.p8-dev-checkbox-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.p8-dev-checkbox-row input {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+  accent-color: #0F172A;
+}
+
+/* Drawer Footer */
+.p8-dev-footer {
+  display: flex;
+  gap: 8px;
+  padding: 12px 18px;
+  background: #F8FAFC;
+  border-top: 1.5px solid #E2E8F0;
+}
+
+.p8-dev-btn {
+  flex: 1;
+  padding: 9px 12px;
+  font-size: 12px;
+  font-weight: 800;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1.5px solid #0F172A;
+  transition: all 0.15s ease;
+  text-align: center;
+}
+
+.p8-dev-btn.copy {
+  background: #0F172A;
+  color: #FFFFFF;
+}
+
+.p8-dev-btn.copy:hover {
+  background: #1E293B;
+  transform: translateY(-1px);
+}
+
+.p8-dev-btn.reset {
+  background: #FFFFFF;
+  color: #0F172A;
+}
+
+.p8-dev-btn.reset:hover {
+  background: #F1F5F9;
+}
