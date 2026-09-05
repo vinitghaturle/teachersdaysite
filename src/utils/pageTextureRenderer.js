@@ -168,13 +168,29 @@ export async function renderQuizPageTexture(materialIndex, questionData, questio
       const cardY = cardStartY + idx * (cardH + cardGap);
       const isSelected = selectedOptionIndex === idx;
 
-      // Card Outline (Double border: White outer, Black inner)
+      // Card Background & Outline
       drawRoundedRect(ctx, rightX, cardY, rightW, cardH, 12 * scale);
-      ctx.lineWidth = isSelected ? 4 * scale : 2.5 * scale;
-      ctx.strokeStyle = '#000000';
-      ctx.stroke();
+      if (isSelected) {
+        // Vibrant Orange Highlight Fill for selected answer
+        ctx.fillStyle = 'rgba(255, 175, 45, 0.48)';
+        ctx.fill();
 
-      // Option Letter Badge (Circle)
+        // White halo under orange stroke for maximum clarity on texture
+        ctx.lineWidth = 6 * scale;
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.stroke();
+
+        // Rich Orange Border
+        ctx.lineWidth = 3.5 * scale;
+        ctx.strokeStyle = '#D97706';
+        ctx.stroke();
+      } else {
+        ctx.lineWidth = 2.5 * scale;
+        ctx.strokeStyle = '#000000';
+        ctx.stroke();
+      }
+
+      // Option Number Badge (Circle)
       const circleX = rightX + 28 * scale;
       const circleY = cardY + cardH / 2;
       const circleR = 16 * scale;
@@ -182,22 +198,25 @@ export async function renderQuizPageTexture(materialIndex, questionData, questio
       ctx.beginPath();
       ctx.arc(circleX, circleY, circleR, 0, Math.PI * 2);
       if (isSelected) {
-        ctx.fillStyle = '#000000';
+        // Orange badge with black text
+        ctx.fillStyle = '#E8A735';
         ctx.fill();
-        ctx.fillStyle = '#FFFFFF';
+        ctx.lineWidth = 2.5 * scale;
+        ctx.strokeStyle = '#92400E';
+        ctx.stroke();
+
+        ctx.font = `900 ${16 * scale}px sans-serif`;
+        ctx.fillStyle = '#000000';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(optionLabels[idx], circleX, circleY);
       } else {
         ctx.lineWidth = 2 * scale;
         ctx.strokeStyle = '#000000';
         ctx.stroke();
-        ctx.fillStyle = '#000000';
-      }
-
-      ctx.font = `800 ${16 * scale}px sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      if (isSelected) {
-        ctx.fillText(optionLabels[idx], circleX, circleY);
-      } else {
+        ctx.font = `800 ${16 * scale}px sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
         drawStrokedText(optionLabels[idx], circleX, circleY);
       }
 
@@ -220,9 +239,14 @@ export async function renderQuizPageTexture(materialIndex, questionData, questio
 
       // Checkmark for selected
       if (isSelected) {
-        ctx.font = `900 ${22 * scale}px sans-serif`;
+        ctx.font = `900 ${24 * scale}px sans-serif`;
         ctx.textAlign = 'right';
-        drawStrokedText('✓', rightX + rightW - 16 * scale, cardY + cardH / 2);
+        ctx.lineJoin = 'round';
+        ctx.lineWidth = 4 * scale;
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.strokeText('✓', rightX + rightW - 16 * scale, cardY + cardH / 2);
+        ctx.fillStyle = '#D97706';
+        ctx.fillText('✓', rightX + rightW - 16 * scale, cardY + cardH / 2);
         ctx.textAlign = 'left';
       }
     });

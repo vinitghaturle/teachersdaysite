@@ -22,7 +22,12 @@ export const QuizPageOverlay = () => {
   }
 
   const stopCapture = (e) => {
-    e.stopPropagation();
+    if (e) {
+      if (typeof e.stopPropagation === 'function') e.stopPropagation();
+      if (e.nativeEvent && typeof e.nativeEvent.stopImmediatePropagation === 'function') {
+        e.nativeEvent.stopImmediatePropagation();
+      }
+    }
   };
 
   // Page 8: Dedicated bottom action controls for Result page
@@ -31,16 +36,23 @@ export const QuizPageOverlay = () => {
       <div
         className="quiz-bottom-bar-wrapper"
         data-clickable="true"
+        onClick={stopCapture}
         onMouseDown={stopCapture}
+        onMouseUp={stopCapture}
         onPointerDown={stopCapture}
+        onPointerUp={stopCapture}
         onTouchStart={stopCapture}
+        onTouchEnd={stopCapture}
       >
         <div className="quiz-bottom-bar" data-clickable="true">
           <button
             type="button"
             className="quiz-bar-btn prev"
             data-clickable="true"
-            onClick={() => goToPage(7)}
+            onClick={(e) => {
+              stopCapture(e);
+              goToPage(7);
+            }}
             onMouseDown={stopCapture}
             onPointerDown={stopCapture}
             onTouchStart={stopCapture}
@@ -56,7 +68,10 @@ export const QuizPageOverlay = () => {
             type="button"
             className="quiz-bar-btn restart"
             data-clickable="true"
-            onClick={restartQuiz}
+            onClick={(e) => {
+              stopCapture(e);
+              restartQuiz();
+            }}
             onMouseDown={stopCapture}
             onPointerDown={stopCapture}
             onTouchStart={stopCapture}
@@ -77,15 +92,18 @@ export const QuizPageOverlay = () => {
   const isAnswered = selectedOptionIndex !== undefined;
   const isLastQuestion = questionIndex === 4;
 
-  const handleOptionSelect = (optionIdx) => {
+  const handleOptionSelect = (e, optionIdx) => {
+    stopCapture(e);
     selectAnswer(questionIndex, optionIdx);
   };
 
-  const handleNext = () => {
+  const handleNext = (e) => {
+    stopCapture(e);
     goToPage(currentPage + 1);
   };
 
-  const handlePrev = () => {
+  const handlePrev = (e) => {
+    stopCapture(e);
     if (currentPage > 3) {
       goToPage(currentPage - 1);
     }
@@ -99,9 +117,13 @@ export const QuizPageOverlay = () => {
       <div
         className="quiz-transparent-hotspot-container"
         data-clickable="true"
+        onClick={stopCapture}
         onMouseDown={stopCapture}
+        onMouseUp={stopCapture}
         onPointerDown={stopCapture}
+        onPointerUp={stopCapture}
         onTouchStart={stopCapture}
+        onTouchEnd={stopCapture}
       >
         <div className="quiz-hotspot-spread">
           <div className="quiz-hotspot-left" />
@@ -112,10 +134,12 @@ export const QuizPageOverlay = () => {
                 type="button"
                 className={`quiz-hotspot-card ${selectedOptionIndex === idx ? 'selected' : ''}`}
                 data-clickable="true"
-                onClick={() => handleOptionSelect(idx)}
+                onClick={(e) => handleOptionSelect(e, idx)}
                 onMouseDown={stopCapture}
+                onMouseUp={stopCapture}
                 onPointerDown={stopCapture}
                 onTouchStart={stopCapture}
+                onTouchEnd={stopCapture}
                 title={`Click to select Option ${idx + 1}`}
               />
             ))}
@@ -127,9 +151,13 @@ export const QuizPageOverlay = () => {
       <div
         className="quiz-bottom-bar-wrapper"
         data-clickable="true"
+        onClick={stopCapture}
         onMouseDown={stopCapture}
+        onMouseUp={stopCapture}
         onPointerDown={stopCapture}
+        onPointerUp={stopCapture}
         onTouchStart={stopCapture}
+        onTouchEnd={stopCapture}
       >
         <div className="quiz-bottom-bar" data-clickable="true">
           {/* Back button */}
@@ -159,10 +187,12 @@ export const QuizPageOverlay = () => {
                     type="button"
                     className={`quiz-circle-num-btn ${isSelected ? 'selected' : ''}`}
                     data-clickable="true"
-                    onClick={() => handleOptionSelect(idx)}
+                    onClick={(e) => handleOptionSelect(e, idx)}
                     onMouseDown={stopCapture}
+                    onMouseUp={stopCapture}
                     onPointerDown={stopCapture}
                     onTouchStart={stopCapture}
+                    onTouchEnd={stopCapture}
                     aria-label={`Select Option ${num}`}
                   >
                     <span className="quiz-circle-num">{num}</span>
