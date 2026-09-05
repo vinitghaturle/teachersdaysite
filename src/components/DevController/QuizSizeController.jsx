@@ -3,12 +3,12 @@ import './QuizSizeController.css';
 
 const DEFAULT_SETTINGS = {
   widthPercent: 71,
-  heightPercent: 53,
-  offsetY: -46,
+  heightPercent: 80,
+  offsetY: 14,
   questionFontSize: 20,
-  optionFontSize: 11,
+  optionFontSize: 13,
   spreadGap: 30,
-  optionPadding: 4,
+  optionPadding: 7,
   borderWidth: 2.5,
 };
 
@@ -20,13 +20,11 @@ export const QuizSizeController = ({ settings, setSettings }) => {
     const newSettings = { ...settings, [key]: Number(value) };
     setSettings(newSettings);
     localStorage.setItem('htwkr_quiz_dev_settings', JSON.stringify(newSettings));
-    window.dispatchEvent(new CustomEvent('htwkr:settingsChanged', { detail: newSettings }));
   };
 
   const handleReset = () => {
     setSettings(DEFAULT_SETTINGS);
     localStorage.setItem('htwkr_quiz_dev_settings', JSON.stringify(DEFAULT_SETTINGS));
-    window.dispatchEvent(new CustomEvent('htwkr:settingsChanged', { detail: DEFAULT_SETTINGS }));
   };
 
   const handleCopy = () => {

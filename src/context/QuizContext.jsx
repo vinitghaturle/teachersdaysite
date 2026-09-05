@@ -43,15 +43,8 @@ export const QuizProvider = ({ children }) => {
       }
     };
 
-    const handleSettingsChanged = (e) => {
-      if (isEngineReadyRef.current || (window.Main && window.Main.maskRevealView && window.Main.maskRevealView.pageMaterials)) {
-        renderAllQuizTextures(questions, answers, score, userName, resultData, e.detail);
-      }
-    };
-
     window.addEventListener('htwkr:pageChange', handlePageChange);
     window.addEventListener('htwkr:userNameSaved', handleUserNameSaved);
-    window.addEventListener('htwkr:settingsChanged', handleSettingsChanged);
 
     // Initial and periodic check to wait for Three.js engine pageMaterials ready
     const timer = setInterval(() => {
@@ -65,10 +58,9 @@ export const QuizProvider = ({ children }) => {
     return () => {
       window.removeEventListener('htwkr:pageChange', handlePageChange);
       window.removeEventListener('htwkr:userNameSaved', handleUserNameSaved);
-      window.removeEventListener('htwkr:settingsChanged', handleSettingsChanged);
       clearInterval(timer);
     };
-  }, [questions, answers, score, userName, resultData]);
+  }, []);
 
   // Update textures whenever questions, answers, score, or username change
   useEffect(() => {

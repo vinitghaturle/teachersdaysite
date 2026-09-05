@@ -1,18 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useQuiz } from '../../context/QuizContext';
-import { QuizSizeController } from '../DevController/QuizSizeController';
 import './QuizPageOverlay.css';
-
-const DEFAULT_SETTINGS = {
-  widthPercent: 71,
-  heightPercent: 53,
-  offsetY: -46,
-  questionFontSize: 20,
-  optionFontSize: 11,
-  spreadGap: 30,
-  optionPadding: 4,
-  borderWidth: 2.5,
-};
 
 export const QuizPageOverlay = () => {
   const {
@@ -28,15 +16,6 @@ export const QuizPageOverlay = () => {
     resultData,
   } = useQuiz();
 
-  const [settings, setSettings] = useState(() => {
-    try {
-      const saved = localStorage.getItem('htwkr_quiz_dev_settings');
-      return saved ? JSON.parse(saved) : DEFAULT_SETTINGS;
-    } catch {
-      return DEFAULT_SETTINGS;
-    }
-  });
-
   // Only active when book is opened and on quiz pages 3 to 8
   if (!isBookEntered || currentPage < 3 || currentPage > 8) {
     return null;
@@ -46,61 +25,46 @@ export const QuizPageOverlay = () => {
     e.stopPropagation();
   };
 
-  // Page 8: Clickable hitboxes for Page 8 Result Spread
+  // Page 8: Dedicated bottom action controls for Result page
   if (currentPage === 8) {
     return (
-      <>
-        <div
-          className="quiz-page-container quiz-interactive-hitbox-container"
-          data-clickable="true"
-          onMouseDown={stopCapture}
-          onPointerDown={stopCapture}
-          onTouchStart={stopCapture}
-          style={{
-            width: `calc(var(--bookPixelWidth, 880px) * ${settings.widthPercent / 100})`,
-            minHeight: `calc(var(--bookPixelWidth, 880px) * 0.57143 * ${settings.heightPercent / 100})`,
-            transform: `translate(-50%, calc(-50% + ${settings.offsetY}px))`,
-          }}
-        >
-          <div
-            className="quiz-book-spread"
-            style={{ gap: `${settings.spreadGap}px` }}
+      <div
+        className="quiz-bottom-bar-wrapper"
+        data-clickable="true"
+        onMouseDown={stopCapture}
+        onPointerDown={stopCapture}
+        onTouchStart={stopCapture}
+      >
+        <div className="quiz-bottom-bar" data-clickable="true">
+          <button
+            type="button"
+            className="quiz-bar-btn prev"
+            data-clickable="true"
+            onClick={() => goToPage(7)}
+            onMouseDown={stopCapture}
+            onPointerDown={stopCapture}
+            onTouchStart={stopCapture}
           >
-            {/* LEFT PAGE: Visual only on 3D paper */}
-            <div className="quiz-left-page-hitbox" />
+            ← Review Q5
+          </button>
 
-            {/* RIGHT PAGE: Clickable Actions over 3D paper */}
-            <div className="quiz-right-page-hitbox" data-clickable="true">
-              <div className="quiz-page-8-actions">
-                <button
-                  type="button"
-                  className="quiz-paper-btn-hitbox prev-btn-hitbox"
-                  data-clickable="true"
-                  onClick={() => goToPage(7)}
-                  onMouseDown={stopCapture}
-                  onPointerDown={stopCapture}
-                  onTouchStart={stopCapture}
-                  title="Review Question 5"
-                />
-
-                <button
-                  type="button"
-                  className="quiz-paper-btn-hitbox retry-btn-hitbox"
-                  data-clickable="true"
-                  onClick={restartQuiz}
-                  onMouseDown={stopCapture}
-                  onPointerDown={stopCapture}
-                  onTouchStart={stopCapture}
-                  title="Try 5 New Questions"
-                />
-              </div>
-            </div>
+          <div className="quiz-bar-score-display">
+            <span>Score: <strong>{score} / 5</strong></span>
           </div>
-        </div>
 
-        {/* Floating Dev Controller for Live Tuning */}
-        <QuizSizeController settings={settings} setSettings={setSettings} />
-      </>
+          <button
+            type="button"
+            className="quiz-bar-btn restart"
+            data-clickable="true"
+            onClick={restartQuiz}
+            onMouseDown={stopCapture}
+            onPointerDown={stopCapture}
+            onTouchStart={stopCapture}
+          >
+            <span>🔄 Try 5 New Questions</span>
+          </button>
+        </div>
+      </div>
     );
   }
 
@@ -118,7 +82,6 @@ export const QuizPageOverlay = () => {
   };
 
   const handleNext = () => {
-    // Go to next page (Page 7 -> Page 8 for results)
     goToPage(currentPage + 1);
   };
 
@@ -128,83 +91,107 @@ export const QuizPageOverlay = () => {
     }
   };
 
+  const optionNumbers = [1, 2, 3, 4];
+
   return (
     <>
+      {/* Transparent Clickable Hotspot Zones over the 4 Textured Options on the 3D Book */}
       <div
-        className="quiz-page-container quiz-interactive-hitbox-container"
+        className="quiz-transparent-hotspot-container"
         data-clickable="true"
         onMouseDown={stopCapture}
         onPointerDown={stopCapture}
         onTouchStart={stopCapture}
-        style={{
-          width: `calc(var(--bookPixelWidth, 880px) * ${settings.widthPercent / 100})`,
-          minHeight: `calc(var(--bookPixelWidth, 880px) * 0.57143 * ${settings.heightPercent / 100})`,
-          transform: `translate(-50%, calc(-50% + ${settings.offsetY}px))`,
-        }}
       >
-        {/* Two-page book spread: Left is Question (on 3D paper), Right has Option Click Hitboxes */}
-        <div
-          className="quiz-book-spread"
-          style={{ gap: `${settings.spreadGap}px` }}
-        >
-          {/* LEFT SIDE: Pure 3D Paper Texture (No duplicate HTML text) */}
-          <div className="quiz-left-page-hitbox" />
+        <div className="quiz-hotspot-spread">
+          <div className="quiz-hotspot-left" />
+          <div className="quiz-hotspot-right">
+            {question.options.map((_, idx) => (
+              <button
+                key={idx}
+                type="button"
+                className={`quiz-hotspot-card ${selectedOptionIndex === idx ? 'selected' : ''}`}
+                data-clickable="true"
+                onClick={() => handleOptionSelect(idx)}
+                onMouseDown={stopCapture}
+                onPointerDown={stopCapture}
+                onTouchStart={stopCapture}
+                title={`Click to select Option ${idx + 1}`}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
 
-          {/* RIGHT SIDE: 4 Clickable Option Card Hitboxes + Navigation */}
-          <div className="quiz-right-page-hitbox" data-clickable="true">
-            {/* 4 Invisible Clickable Cards directly over the 3D paper options */}
-            <div className="quiz-options-hitbox-list">
-              {question.options.map((opt, idx) => {
+      {/* Bottom Circle Selector (1) (2) (3) (4) & Navigation Toolbar */}
+      <div
+        className="quiz-bottom-bar-wrapper"
+        data-clickable="true"
+        onMouseDown={stopCapture}
+        onPointerDown={stopCapture}
+        onTouchStart={stopCapture}
+      >
+        <div className="quiz-bottom-bar" data-clickable="true">
+          {/* Back button */}
+          {currentPage > 3 && (
+            <button
+              type="button"
+              className="quiz-bar-btn prev"
+              data-clickable="true"
+              onClick={handlePrev}
+              onMouseDown={stopCapture}
+              onPointerDown={stopCapture}
+              onTouchStart={stopCapture}
+            >
+              ← Back
+            </button>
+          )}
+
+          {/* 1, 2, 3, 4 inside Circles for Option Selection */}
+          <div className="quiz-circle-selector-group">
+            <span className="quiz-selector-label">Choose Option:</span>
+            <div className="quiz-circle-buttons">
+              {optionNumbers.map((num, idx) => {
+                const isSelected = selectedOptionIndex === idx;
                 return (
                   <button
-                    key={idx}
+                    key={num}
                     type="button"
-                    className="quiz-option-hitbox"
+                    className={`quiz-circle-num-btn ${isSelected ? 'selected' : ''}`}
                     data-clickable="true"
                     onClick={() => handleOptionSelect(idx)}
                     onMouseDown={stopCapture}
                     onPointerDown={stopCapture}
                     onTouchStart={stopCapture}
-                    aria-label={`Option ${idx + 1}: ${opt.text}`}
-                    title={`Click to choose Option ${['A', 'B', 'C', 'D'][idx]}`}
-                  />
+                    aria-label={`Select Option ${num}`}
+                  >
+                    <span className="quiz-circle-num">{num}</span>
+                  </button>
                 );
               })}
             </div>
-
-            {/* Navigation Hitboxes */}
-            <div className="quiz-actions-hitbox-row">
-              {currentPage > 3 && (
-                <button
-                  type="button"
-                  className="quiz-paper-btn-hitbox prev-btn-hitbox"
-                  data-clickable="true"
-                  onClick={handlePrev}
-                  onMouseDown={stopCapture}
-                  onPointerDown={stopCapture}
-                  onTouchStart={stopCapture}
-                  title="Back to Previous Page"
-                />
-              )}
-
-              <button
-                type="button"
-                className={`quiz-paper-btn-hitbox next-btn-hitbox ${!isAnswered ? 'disabled' : ''}`}
-                disabled={!isAnswered}
-                data-clickable="true"
-                onClick={handleNext}
-                onMouseDown={stopCapture}
-                onPointerDown={stopCapture}
-                onTouchStart={stopCapture}
-                title={isLastQuestion ? 'Go to Page 8 Result' : 'Go to Next Question'}
-              />
-            </div>
           </div>
+
+          {/* Score Counter */}
+          <div className="quiz-bar-score-display">
+            <span>Score: <strong>{score}/5</strong></span>
+          </div>
+
+          {/* Next button */}
+          <button
+            type="button"
+            className={`quiz-bar-btn next ${!isAnswered ? 'disabled' : ''}`}
+            disabled={!isAnswered}
+            data-clickable="true"
+            onClick={handleNext}
+            onMouseDown={stopCapture}
+            onPointerDown={stopCapture}
+            onTouchStart={stopCapture}
+          >
+            <span>{isLastQuestion ? 'View Result (Page 8) →' : 'Next Question →'}</span>
+          </button>
         </div>
       </div>
-
-      {/* Floating Dev Controller for Live Tuning */}
-      <QuizSizeController settings={settings} setSettings={setSettings} />
     </>
   );
 };
