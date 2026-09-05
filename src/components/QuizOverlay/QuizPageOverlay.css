@@ -1,10 +1,9 @@
-/* Quiz Page Overlay for Pages 3 to 8 (Transparent Background, White Text Border / Outline, Black Borders) */
+/* Quiz Page Overlay for Pages 3 to 8 (Transparent Background, 2px White Text Border, 3D Book Page-Turn Animation) */
 
 .quiz-page-container {
   position: fixed;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
   z-index: 999990;
   width: 90vw;
   max-width: 1040px;
@@ -14,6 +13,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  perspective: 1600px;
+  transform-style: preserve-3d;
+  transition: transform 0.15s ease-out;
 }
 
 /* Two-Page Book Spread: Left is Question/Score, Right is Options/Compliment */
@@ -24,9 +26,10 @@
   width: 100%;
   align-items: stretch;
   background: transparent !important;
+  transform-style: preserve-3d;
 }
 
-/* LEFT PAGE */
+/* LEFT PAGE: 3D Animated with page turn */
 .quiz-left-page {
   background: transparent !important;
   backdrop-filter: none !important;
@@ -39,6 +42,47 @@
   justify-content: space-between;
   min-height: 380px;
   pointer-events: auto !important;
+  transform-origin: right center;
+  animation: pageTurnLeft 0.55s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+}
+
+/* RIGHT PAGE: 3D Animated with page turn */
+.quiz-right-page {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 380px;
+  pointer-events: auto !important;
+  transform-origin: left center;
+  animation: pageTurnRight 0.55s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+}
+
+@keyframes pageTurnLeft {
+  0% {
+    opacity: 0;
+    transform: rotateY(-18deg) translateZ(-35px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: rotateY(0deg) translateZ(0) scale(1);
+  }
+}
+
+@keyframes pageTurnRight {
+  0% {
+    opacity: 0;
+    transform: rotateY(24deg) translateZ(-45px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: rotateY(0deg) translateZ(0) scale(1);
+  }
 }
 
 .quiz-header-meta {
@@ -59,7 +103,9 @@
   padding: 3px 8px;
   border-radius: 6px;
   box-shadow: 0 0 0 1px #ffffff;
-  text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
+  -webkit-text-stroke: 1.5px #ffffff;
+  paint-order: stroke fill;
+  text-shadow: 0 0 2px #ffffff, -1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff, 1px 1px 0 #ffffff;
 }
 
 .quiz-difficulty-tag {
@@ -71,7 +117,9 @@
   padding: 3px 8px;
   border-radius: 6px;
   box-shadow: 0 0 0 1px #ffffff;
-  text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
+  -webkit-text-stroke: 1.5px #ffffff;
+  paint-order: stroke fill;
+  text-shadow: 0 0 2px #ffffff, -1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff, 1px 1px 0 #ffffff;
 }
 
 .quiz-question-box {
@@ -81,7 +129,7 @@
   padding: 10px 0;
 }
 
-/* White outline/border around black text */
+/* 2px White Border / Stroke Around Question Text */
 .quiz-question-prompt {
   font-family: 'Canela Web', Georgia, serif;
   font-size: 20px;
@@ -89,13 +137,14 @@
   color: #000000 !important;
   font-weight: 700;
   margin: 0;
+  -webkit-text-stroke: 2px #ffffff;
+  paint-order: stroke fill;
   text-shadow: 
-    -1.5px -1.5px 0 #ffffff,
-     1.5px -1.5px 0 #ffffff,
-    -1.5px  1.5px 0 #ffffff,
-     1.5px  1.5px 0 #ffffff,
-     0px 0px 4px rgba(255, 255, 255, 0.95);
-  -webkit-text-stroke: 0.4px #ffffff;
+    -2px -2px 0 #ffffff,
+     2px -2px 0 #ffffff,
+    -2px  2px 0 #ffffff,
+     2px  2px 0 #ffffff,
+     0px 0px 4px #ffffff;
 }
 
 .quiz-left-footer {
@@ -113,7 +162,9 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
+  -webkit-text-stroke: 1.5px #ffffff;
+  paint-order: stroke fill;
+  text-shadow: 0 0 2px #ffffff, -1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff, 1px 1px 0 #ffffff;
 }
 
 .quiz-teacher-pill {
@@ -125,22 +176,9 @@
   border-radius: 9999px;
   font-weight: 700;
   box-shadow: 0 0 0 1px #ffffff;
-  text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
-}
-
-/* RIGHT PAGE */
-.quiz-right-page {
-  background: transparent !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  border: none !important;
-  box-shadow: none !important;
-  padding: 18px 16px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  min-height: 380px;
-  pointer-events: auto !important;
+  -webkit-text-stroke: 1.5px #ffffff;
+  paint-order: stroke fill;
+  text-shadow: 0 0 2px #ffffff, -1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff, 1px 1px 0 #ffffff;
 }
 
 .quiz-options-header {
@@ -156,7 +194,9 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: #000000 !important;
-  text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
+  -webkit-text-stroke: 1.5px #ffffff;
+  paint-order: stroke fill;
+  text-shadow: 0 0 2px #ffffff, -1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff, 1px 1px 0 #ffffff;
 }
 
 .quiz-points-badge {
@@ -168,7 +208,9 @@
   padding: 2px 8px;
   border-radius: 9999px;
   box-shadow: 0 0 0 1px #ffffff;
-  text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
+  -webkit-text-stroke: 1.5px #ffffff;
+  paint-order: stroke fill;
+  text-shadow: 0 0 2px #ffffff, -1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff, 1px 1px 0 #ffffff;
 }
 
 .quiz-options-list {
@@ -178,7 +220,7 @@
   flex: 1;
 }
 
-/* Option Cards with white text outline */
+/* Option Cards with 2px white text outline */
 .quiz-option-card {
   width: 100%;
   text-align: left;
@@ -221,29 +263,34 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
+  -webkit-text-stroke: 1.5px #ffffff;
+  paint-order: stroke fill;
+  text-shadow: 0 0 2px #ffffff, -1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff, 1px 1px 0 #ffffff;
   transition: all 0.2s ease;
 }
 
 .quiz-option-card.selected .quiz-option-letter {
   background: #000000 !important;
   color: #FFFFFF !important;
+  -webkit-text-stroke: none;
   text-shadow: none;
 }
 
+/* 2px White Border around Option Text */
 .quiz-option-text {
   flex: 1;
   font-size: 13px;
   line-height: 1.35;
   color: #000000 !important;
   font-weight: 700;
+  -webkit-text-stroke: 1.8px #ffffff;
+  paint-order: stroke fill;
   text-shadow: 
-    -1px -1px 0 #ffffff,
-     1px -1px 0 #ffffff,
-    -1px  1px 0 #ffffff,
-     1px  1px 0 #ffffff,
-     0px 0px 3px rgba(255, 255, 255, 0.95);
-  -webkit-text-stroke: 0.35px #ffffff;
+    -1.8px -1.8px 0 #ffffff,
+     1.8px -1.8px 0 #ffffff,
+    -1.8px  1.8px 0 #ffffff,
+     1.8px  1.8px 0 #ffffff,
+     0px 0px 3px #ffffff;
 }
 
 .quiz-option-card.selected .quiz-option-text {
@@ -254,7 +301,9 @@
   color: #000000 !important;
   font-size: 16px;
   font-weight: 900;
-  text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
+  -webkit-text-stroke: 1.5px #ffffff;
+  paint-order: stroke fill;
+  text-shadow: 0 0 2px #ffffff, -1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff, 1px 1px 0 #ffffff;
 }
 
 /* Action Buttons */
@@ -279,13 +328,16 @@
   box-shadow: 0 0 0 1px #ffffff;
   cursor: pointer !important;
   pointer-events: auto !important;
-  text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
+  -webkit-text-stroke: 1.5px #ffffff;
+  paint-order: stroke fill;
+  text-shadow: 0 0 2px #ffffff, -1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff, 1px 1px 0 #ffffff;
   transition: all 0.2s ease;
 }
 
 .quiz-prev-btn:hover {
   background: #000000 !important;
   color: #FFFFFF !important;
+  -webkit-text-stroke: none;
   text-shadow: none;
 }
 
@@ -306,7 +358,9 @@
 .quiz-next-btn:hover:not(.disabled) {
   background: transparent !important;
   color: #000000 !important;
-  text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
+  -webkit-text-stroke: 1.5px #ffffff;
+  paint-order: stroke fill;
+  text-shadow: 0 0 2px #ffffff, -1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff, 1px 1px 0 #ffffff;
   transform: translateY(-2px);
 }
 
@@ -339,13 +393,14 @@
   color: #000000;
   font-weight: 800;
   margin: 0 0 6px;
+  -webkit-text-stroke: 2px #ffffff;
+  paint-order: stroke fill;
   text-shadow: 
-    -1.5px -1.5px 0 #ffffff,
-     1.5px -1.5px 0 #ffffff,
-    -1.5px  1.5px 0 #ffffff,
-     1.5px  1.5px 0 #ffffff,
-     0px 0px 4px rgba(255, 255, 255, 0.95);
-  -webkit-text-stroke: 0.4px #ffffff;
+    -2px -2px 0 #ffffff,
+     2px -2px 0 #ffffff,
+    -2px  2px 0 #ffffff,
+     2px  2px 0 #ffffff,
+     0px 0px 4px #ffffff;
 }
 
 .quiz-result-teacher-name {
@@ -353,7 +408,9 @@
   color: #000000;
   font-weight: 700;
   margin: 0;
-  text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
+  -webkit-text-stroke: 1.5px #ffffff;
+  paint-order: stroke fill;
+  text-shadow: 0 0 2px #ffffff, -1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff, 1px 1px 0 #ffffff;
 }
 
 .quiz-result-stats-row {
@@ -371,7 +428,9 @@
   font-weight: 700;
   color: #000000;
   box-shadow: 0 0 0 1px #ffffff;
-  text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
+  -webkit-text-stroke: 1.5px #ffffff;
+  paint-order: stroke fill;
+  text-shadow: 0 0 2px #ffffff, -1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff, 1px 1px 0 #ffffff;
 }
 
 .quiz-result-message-box {
@@ -389,13 +448,14 @@
   font-weight: 700;
   margin: 0;
   text-align: center;
+  -webkit-text-stroke: 1.8px #ffffff;
+  paint-order: stroke fill;
   text-shadow: 
-    -1px -1px 0 #ffffff,
-     1px -1px 0 #ffffff,
-    -1px  1px 0 #ffffff,
-     1px  1px 0 #ffffff,
-     0px 0px 3px rgba(255, 255, 255, 0.95);
-  -webkit-text-stroke: 0.35px #ffffff;
+    -1.8px -1.8px 0 #ffffff,
+     1.8px -1.8px 0 #ffffff,
+    -1.8px  1.8px 0 #ffffff,
+     1.8px  1.8px 0 #ffffff,
+     0px 0px 3px #ffffff;
 }
 
 /* Responsive adjustments */

@@ -37,6 +37,24 @@ export const QuizPageOverlay = () => {
     }
   });
 
+  const [parallax, setParallax] = useState({ rotX: 0, rotY: 0, transX: 0, transY: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      const normX = (e.clientX / window.innerWidth - 0.5) * 2;
+      const normY = (e.clientY / window.innerHeight - 0.5) * 2;
+      setParallax({
+        rotX: -normY * 2.5,
+        rotY: normX * 3.5,
+        transX: normX * 5,
+        transY: normY * 4,
+      });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
   // Only active when book is opened and on quiz pages 3 to 8
   if (!isBookEntered || currentPage < 3 || currentPage > 8) {
     return null;
@@ -51,6 +69,7 @@ export const QuizPageOverlay = () => {
     return (
       <>
         <div
+          key="page-8-result"
           className="quiz-page-container quiz-result-page-container"
           data-clickable="true"
           onMouseDown={stopCapture}
@@ -59,7 +78,7 @@ export const QuizPageOverlay = () => {
           style={{
             width: `calc(var(--bookPixelWidth, 880px) * ${settings.widthPercent / 100})`,
             minHeight: `calc(var(--bookPixelWidth, 880px) * 0.57143 * ${settings.heightPercent / 100})`,
-            transform: `translate(-50%, calc(-50% + ${settings.offsetY}px))`,
+            transform: `translate(calc(-50% + ${parallax.transX}px), calc(-50% + ${settings.offsetY + parallax.transY}px)) rotateX(${parallax.rotX}deg) rotateY(${parallax.rotY}deg)`,
           }}
         >
           <div
@@ -193,6 +212,7 @@ export const QuizPageOverlay = () => {
   return (
     <>
       <div
+        key={`page-quiz-${currentPage}`}
         className="quiz-page-container"
         data-clickable="true"
         onMouseDown={stopCapture}
@@ -201,7 +221,7 @@ export const QuizPageOverlay = () => {
         style={{
           width: `calc(var(--bookPixelWidth, 880px) * ${settings.widthPercent / 100})`,
           minHeight: `calc(var(--bookPixelWidth, 880px) * 0.57143 * ${settings.heightPercent / 100})`,
-          transform: `translate(-50%, calc(-50% + ${settings.offsetY}px))`,
+          transform: `translate(calc(-50% + ${parallax.transX}px), calc(-50% + ${settings.offsetY + parallax.transY}px)) rotateX(${parallax.rotX}deg) rotateY(${parallax.rotY}deg)`,
         }}
       >
         {/* Two-page book spread: Left is Question, Right is Options */}
