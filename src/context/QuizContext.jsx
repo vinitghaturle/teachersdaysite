@@ -11,6 +11,8 @@ export const QuizProvider = ({ children }) => {
   const [isBookEntered, setIsBookEntered] = useState(false);
   const [userName, setUserName] = useState(() => localStorage.getItem('htwkr_userName') || '');
   const [showResultModal, setShowResultModal] = useState(false);
+  const [timeTaken, setTimeTaken] = useState('00 : 45');
+  const startTimeRef = useRef(Date.now());
   const isEngineReadyRef = useRef(false);
 
   // Compute total score based on selected answers
@@ -31,9 +33,18 @@ export const QuizProvider = ({ children }) => {
       const entered = e.detail?.entered;
       if (typeof page === 'number') {
         setCurrentPage(page);
+        if (page === 8) {
+          const elapsedSec = Math.max(12, Math.floor((Date.now() - startTimeRef.current) / 1000));
+          const mins = String(Math.floor(elapsedSec / 60)).padStart(2, '0');
+          const secs = String(elapsedSec % 60).padStart(2, '0');
+          setTimeTaken(`${mins} : ${secs}`);
+        }
       }
       if (entered !== undefined) {
         setIsBookEntered(entered);
+        if (entered) {
+          startTimeRef.current = Date.now();
+        }
       }
     };
 
@@ -50,7 +61,7 @@ export const QuizProvider = ({ children }) => {
     const timer = setInterval(() => {
       if (window.Main && window.Main.maskRevealView && window.Main.maskRevealView.pageMaterials && window.Main.maskRevealView.pageMaterials.length >= 8) {
         isEngineReadyRef.current = true;
-        renderAllQuizTextures(questions, answers, score, userName, resultData);
+        renderAllQuizTextures(questions, answers, score, userName, resultData, timeTaken);
         clearInterval(timer);
       }
     }, 500);
@@ -62,12 +73,12 @@ export const QuizProvider = ({ children }) => {
     };
   }, []);
 
-  // Update textures whenever questions, answers, score, or username change
+  // Update textures whenever questions, answers, score, username, or timeTaken change
   useEffect(() => {
     if (isEngineReadyRef.current || (window.Main && window.Main.maskRevealView && window.Main.maskRevealView.pageMaterials)) {
-      renderAllQuizTextures(questions, answers, score, userName, resultData);
+      renderAllQuizTextures(questions, answers, score, userName, resultData, timeTaken);
     }
-  }, [questions, answers, score, userName]);
+  }, [questions, answers, score, userName, timeTaken]);
 
   const selectAnswer = (questionIndex, optionIndex) => {
     setAnswers((prev) => ({

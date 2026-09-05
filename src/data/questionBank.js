@@ -8,43 +8,61 @@ export const WELCOME_LINES = [
   "Five questions. One compliment. Let's build it together.",
 ];
 
-export const RESULT_MESSAGES = {
-  5: {
-    score: '5 / 5',
+export const SCORE_TIERS = [
+  {
+    tier: 5,
+    minScore: 5,
+    maxScore: 5,
+    scoreDisplay: '5 / 5',
     label: 'Certified Icon',
-    message: "Five for five. Either we know you too well, or you've made a real impression — probably both.",
-    badge: '🏆',
+    icon: '👑',
+    desc: "Five for five. Either you know us too well, or we've paid attention — probably both.",
   },
-  4: {
-    score: '4 / 5',
+  {
+    tier: 4,
+    minScore: 4,
+    maxScore: 4,
+    scoreDisplay: '4 / 5',
     label: 'Lowkey Iconic',
-    message: 'So close to a clean sweep. One question stumped us, the rest was easy.',
-    badge: '🌟',
+    icon: '⭐',
+    desc: 'So close to a clean sweep. One question stumped you, the rest was easy.',
   },
-  3: {
-    score: '3 / 5',
+  {
+    tier: 3,
+    minScore: 3,
+    maxScore: 3,
+    scoreDisplay: '3 / 5',
     label: 'Kinda Slaps',
-    message: 'A solid guess rate. We know you well — just not psychic-level well.',
-    badge: '✨',
+    icon: '🕶️',
+    desc: 'A solid guess rate. You know us well — just not psychic-level well.',
   },
-  2: {
-    score: '2 / 5',
+  {
+    tier: 2,
+    minScore: 2,
+    maxScore: 2,
+    scoreDisplay: '2 / 5',
     label: 'Mid, Ngl',
-    message: 'A few lucky guesses in there. Might be time you told us more about yourself.',
-    badge: '☕',
+    icon: '🌱',
+    desc: 'A few lucky guesses in there. Might be time we told you more about ourselves.',
   },
-  1: {
-    score: '1 / 5',
+  {
+    tier: 1,
+    minScore: 0,
+    maxScore: 1,
+    scoreDisplay: '0 – 1 / 5',
     label: "It's Giving Stranger",
-    message: 'Rough round. Might be time for that long-overdue chai and catch-up.',
-    badge: '👀',
+    icon: '🌧️',
+    desc: 'Rough round. Might be time for that long-overdue chai and catch-up.',
   },
-  0: {
-    score: '0 / 5',
-    label: "It's Giving Stranger",
-    message: 'Rough round. Might be time for that long-overdue chai and catch-up.',
-    badge: '👀',
-  },
+];
+
+export const RESULT_MESSAGES = {
+  5: SCORE_TIERS[0],
+  4: SCORE_TIERS[1],
+  3: SCORE_TIERS[2],
+  2: SCORE_TIERS[3],
+  1: SCORE_TIERS[4],
+  0: SCORE_TIERS[4],
 };
 
 export const ALL_QUESTIONS = [
