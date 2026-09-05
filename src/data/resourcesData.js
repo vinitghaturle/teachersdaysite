@@ -1,25 +1,10 @@
 export const RESOURCES_DATA = {
-  title: "More resources for parents",
+  title: "Thank you for everything, You guys are great",
   links: [
     {
-      action: "Read: ",
-      title: "Coretta Scott King Book Award Winners",
-      url: "https://www.commonsensemedia.org/lists/coretta-scott-king-book-award-winners",
-    },
-    {
-      action: "Watch: ",
-      title: "New York Times – Exploring Race",
-      url: "https://www.nytimes.com/2017/03/15/learning/lesson-plans/25-mini-films-for-exploring-race-bias-and-identity-with-students.html",
-    },
-    {
-      action: "Follow: ",
-      title: "The Conscious Kid on Instagram",
-      url: "https://www.instagram.com/theconsciouskid/",
-    },
-    {
-      action: "Listen: ",
-      title: "Raising White Kids with Jennifer Harvey",
-      url: "https://integratedschools.simplecast.com/episodes/harvey",
-    },
+      action: "",
+      title: "Thank you for being the guiding light, patient mentor, and constant source of inspiration in my life. Your lessons reach far beyond the classroom, shaping who I am today. Wishing you a very Happy Teachers' Day!",
+      url: "",
+    }
   ],
 };

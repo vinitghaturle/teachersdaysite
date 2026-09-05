@@ -119,6 +119,7 @@ export const QuizProvider = ({ children }) => {
         showResultModal,
         setShowResultModal,
         resultData,
+        timeTaken,
       }}
     >
       {children}
