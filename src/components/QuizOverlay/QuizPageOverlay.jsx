@@ -1,6 +1,18 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuiz } from '../../context/QuizContext';
+import { QuizSizeController } from '../DevController/QuizSizeController';
 import './QuizPageOverlay.css';
+
+const DEFAULT_SETTINGS = {
+  widthPercent: 80,
+  heightPercent: 80,
+  offsetY: 0,
+  questionFontSize: 20,
+  optionFontSize: 13,
+  spreadGap: 36,
+  optionPadding: 9,
+  borderWidth: 1.5,
+};
 
 export const QuizPageOverlay = () => {
   const {
@@ -17,6 +29,15 @@ export const QuizPageOverlay = () => {
     setShowResultModal,
     resultData,
   } = useQuiz();
+
+  const [settings, setSettings] = useState(() => {
+    try {
+      const saved = localStorage.getItem('htwkr_quiz_dev_settings');
+      return saved ? JSON.parse(saved) : DEFAULT_SETTINGS;
+    } catch {
+      return DEFAULT_SETTINGS;
+    }
+  });
 
   // Only active when book is opened and on quiz pages 3 to 7
   if (!isBookEntered || currentPage < 3 || currentPage > 7) {
@@ -63,32 +84,55 @@ export const QuizPageOverlay = () => {
         onMouseDown={stopCapture}
         onPointerDown={stopCapture}
         onTouchStart={stopCapture}
+        style={{
+          width: `calc(var(--bookPixelWidth, 880px) * ${settings.widthPercent / 100})`,
+          minHeight: `calc(var(--bookPixelWidth, 880px) * 0.57143 * ${settings.heightPercent / 100})`,
+          transform: `translate(-50%, calc(-50% + ${settings.offsetY}px))`,
+        }}
       >
         {/* Two-page book spread: Left is Question, Right is Options */}
-        <div className="quiz-book-spread">
+        <div
+          className="quiz-book-spread"
+          style={{ gap: `${settings.spreadGap}px` }}
+        >
           {/* LEFT SIDE: Question prompt & Info */}
           <div className="quiz-left-page" data-clickable="true">
             <div className="quiz-header-meta">
-              <span className="quiz-qnum-tag">
+              <span
+                className="quiz-qnum-tag"
+                style={{ borderWidth: `${settings.borderWidth}px` }}
+              >
                 QUESTION 0{questionIndex + 1} / 05
               </span>
-              <span className="quiz-difficulty-tag">
+              <span
+                className="quiz-difficulty-tag"
+                style={{ borderWidth: `${settings.borderWidth}px` }}
+              >
                 {question.difficulty === 'Easy' ? 'Classroom Moment' : 'Real-Life Scenario'}
               </span>
             </div>
 
             <div className="quiz-question-box">
-              <p className="quiz-question-prompt">
+              <p
+                className="quiz-question-prompt"
+                style={{ fontSize: `${settings.questionFontSize}px` }}
+              >
                 "{question.scenario}"
               </p>
             </div>
 
-            <div className="quiz-left-footer">
+            <div
+              className="quiz-left-footer"
+              style={{ borderTopWidth: `${settings.borderWidth}px` }}
+            >
               <div className="quiz-score-indicator">
                 <span>⭐ Score: <strong>{score}</strong> / 5</span>
               </div>
               {userName && (
-                <span className="quiz-teacher-pill">
+                <span
+                  className="quiz-teacher-pill"
+                  style={{ borderWidth: `${settings.borderWidth}px` }}
+                >
                   Teacher: {userName}
                 </span>
               )}
@@ -99,7 +143,12 @@ export const QuizPageOverlay = () => {
           <div className="quiz-right-page" data-clickable="true">
             <div className="quiz-options-header">
               <span className="quiz-options-title">Select the best completion:</span>
-              <span className="quiz-points-badge">+1 pt</span>
+              <span
+                className="quiz-points-badge"
+                style={{ borderWidth: `${settings.borderWidth}px` }}
+              >
+                +1 pt
+              </span>
             </div>
 
             <div className="quiz-options-list">
@@ -121,11 +170,23 @@ export const QuizPageOverlay = () => {
                     onPointerDown={stopCapture}
                     onTouchStart={stopCapture}
                     aria-label={`Option ${optionLetters[idx]}: ${opt.text}`}
+                    style={{
+                      borderWidth: `${isSelected ? settings.borderWidth + 1.5 : settings.borderWidth}px`,
+                      padding: `${settings.optionPadding}px 14px`,
+                    }}
                   >
-                    <span className="quiz-option-letter">
+                    <span
+                      className="quiz-option-letter"
+                      style={{ borderWidth: `${settings.borderWidth}px` }}
+                    >
                       {optionLetters[idx]}
                     </span>
-                    <span className="quiz-option-text">{opt.text}</span>
+                    <span
+                      className="quiz-option-text"
+                      style={{ fontSize: `${settings.optionFontSize}px` }}
+                    >
+                      {opt.text}
+                    </span>
                     {isSelected && (
                       <span className="quiz-option-check">✓</span>
                     )}
@@ -135,7 +196,10 @@ export const QuizPageOverlay = () => {
             </div>
 
             {/* Navigation Actions on Right Page */}
-            <div className="quiz-actions-row">
+            <div
+              className="quiz-actions-row"
+              style={{ borderTopWidth: `${settings.borderWidth}px` }}
+            >
               {currentPage > 3 && (
                 <button
                   type="button"
@@ -145,6 +209,7 @@ export const QuizPageOverlay = () => {
                   onMouseDown={stopCapture}
                   onPointerDown={stopCapture}
                   onTouchStart={stopCapture}
+                  style={{ borderWidth: `${settings.borderWidth}px` }}
                 >
                   ← Back
                 </button>
@@ -159,6 +224,7 @@ export const QuizPageOverlay = () => {
                 onMouseDown={stopCapture}
                 onPointerDown={stopCapture}
                 onTouchStart={stopCapture}
+                style={{ borderWidth: `${settings.borderWidth}px` }}
               >
                 <span>
                   {isLastQuestion ? 'View Results 🎉' : 'Next Question →'}
@@ -168,6 +234,9 @@ export const QuizPageOverlay = () => {
           </div>
         </div>
       </div>
+
+      {/* Floating Dev Controller for Live Tuning */}
+      <QuizSizeController settings={settings} setSettings={setSettings} />
 
       {/* Result Screen Modal */}
       {showResultModal && (
@@ -231,4 +300,5 @@ export const QuizPageOverlay = () => {
     </>
   );
 };
+
 
