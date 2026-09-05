@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { getRandomQuestions, RESULT_MESSAGES } from '../data/questionBank';
+import { renderAllQuizTextures } from '../utils/pageTextureRenderer';
 
 const QuizContext = createContext(null);
 
@@ -10,6 +11,19 @@ export const QuizProvider = ({ children }) => {
   const [isBookEntered, setIsBookEntered] = useState(false);
   const [userName, setUserName] = useState(() => localStorage.getItem('htwkr_userName') || '');
   const [showResultModal, setShowResultModal] = useState(false);
+  const isEngineReadyRef = useRef(false);
+
+  // Compute total score based on selected answers
+  const score = Object.entries(answers).reduce((acc, [qIdxStr, optIdx]) => {
+    const qIdx = parseInt(qIdxStr, 10);
+    const q = questions[qIdx];
+    if (q && q.options[optIdx]?.isCorrect) {
+      return acc + 1;
+    }
+    return acc;
+  }, 0);
+
+  const resultData = RESULT_MESSAGES[score] || RESULT_MESSAGES[0];
 
   useEffect(() => {
     const handlePageChange = (e) => {
@@ -32,21 +46,28 @@ export const QuizProvider = ({ children }) => {
     window.addEventListener('htwkr:pageChange', handlePageChange);
     window.addEventListener('htwkr:userNameSaved', handleUserNameSaved);
 
+    // Initial and periodic check to wait for Three.js engine pageMaterials ready
+    const timer = setInterval(() => {
+      if (window.Main && window.Main.maskRevealView && window.Main.maskRevealView.pageMaterials && window.Main.maskRevealView.pageMaterials.length >= 8) {
+        isEngineReadyRef.current = true;
+        renderAllQuizTextures(questions, answers, score, userName, resultData);
+        clearInterval(timer);
+      }
+    }, 500);
+
     return () => {
       window.removeEventListener('htwkr:pageChange', handlePageChange);
       window.removeEventListener('htwkr:userNameSaved', handleUserNameSaved);
+      clearInterval(timer);
     };
   }, []);
 
-  // Compute total score based on selected answers
-  const score = Object.entries(answers).reduce((acc, [qIdxStr, optIdx]) => {
-    const qIdx = parseInt(qIdxStr, 10);
-    const q = questions[qIdx];
-    if (q && q.options[optIdx]?.isCorrect) {
-      return acc + 1;
+  // Update textures whenever questions, answers, score, or username change
+  useEffect(() => {
+    if (isEngineReadyRef.current || (window.Main && window.Main.maskRevealView && window.Main.maskRevealView.pageMaterials)) {
+      renderAllQuizTextures(questions, answers, score, userName, resultData);
     }
-    return acc;
-  }, 0);
+  }, [questions, answers, score, userName]);
 
   const selectAnswer = (questionIndex, optionIndex) => {
     setAnswers((prev) => ({
@@ -56,10 +77,11 @@ export const QuizProvider = ({ children }) => {
   };
 
   const restartQuiz = () => {
-    setQuestions(getRandomQuestions(5));
+    const newQuestions = getRandomQuestions(5);
+    setQuestions(newQuestions);
     setAnswers({});
     setShowResultModal(false);
-    // Turn back to page 3 (first question) or page 1
+    // Turn back to page 3 (first question)
     if (window.Main && window.Main.maskRevealView) {
       window.Main.maskRevealView.setCurrentPage(3);
     }
@@ -70,8 +92,6 @@ export const QuizProvider = ({ children }) => {
       window.Main.maskRevealView.setCurrentPage(pageIndex);
     }
   };
-
-  const resultData = RESULT_MESSAGES[score] || RESULT_MESSAGES[0];
 
   return (
     <QuizContext.Provider
@@ -102,3 +122,4 @@ export const useQuiz = () => {
   }
   return context;
 };
+
