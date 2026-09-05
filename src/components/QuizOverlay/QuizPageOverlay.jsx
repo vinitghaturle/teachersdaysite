@@ -32,14 +32,15 @@ export const QuizPageOverlay = () => {
     }
   };
 
-  // Page 8: Everything is rendered directly on the 3D paper background itself!
-  // We provide a transparent hotspot over the on-paper "Play Again →" button plus bottom toolbar.
+  // Page 8: Full Teachers' Day Special Result Sheet rendered embedded on Page 8
   if (currentPage === 8) {
+    const activeTier = resultData || SCORE_TIERS[1];
+    const displayTime = timeTaken || '00 : 42';
+
     return (
       <>
-        {/* Transparent Hotspot mapped over the "Play Again →" button on the 3D Paper */}
         <div
-          className="quiz-transparent-hotspot-container"
+          className="p8-modal-root-wrapper"
           data-clickable="true"
           onClick={stopCapture}
           onMouseDown={stopCapture}
@@ -49,14 +50,120 @@ export const QuizPageOverlay = () => {
           onTouchStart={stopCapture}
           onTouchEnd={stopCapture}
         >
-          <div className="quiz-hotspot-spread">
-            <div className="quiz-hotspot-left" />
-            <div className="quiz-hotspot-right p8-hotspot-right">
+          <div className="p8-modal-card" data-clickable="true">
+            {/* Top Left Yellow Wave & Dot Grid */}
+            <div className="p8-corner-wave top-left" />
+            <div className="p8-dot-grid-decor top-left" />
+
+            {/* Top Right Post-it Sticky Note */}
+            <div className="p8-sticky-note-card">
+              <div className="p8-tape" />
+              <div className="p8-sticky-text">
+                <span>Great</span>
+                <span>Teachers</span>
+                <span>Make a</span>
+                <span>Bigger World</span>
+                <span className="p8-heart">♡</span>
+              </div>
+            </div>
+
+            {/* Doodles Left & Right */}
+            <div className="p8-doodle-text left-side">
+              <span>Good<br/>Teachers<br/>Brighter<br/>Tomorrows<br/>♡</span>
+            </div>
+
+            <div className="p8-doodle-text right-side">
+              <span>Same<br/>Classrooms<br/>New Perspectives</span>
+            </div>
+
+            {/* Bottom Left 3 Stacked Books */}
+            <div className="p8-books-stack">
+              <div className="p8-single-book book-cyan">Curiosity</div>
+              <div className="p8-single-book book-yellow">Kindness</div>
+              <div className="p8-single-book book-white">Impact</div>
+            </div>
+
+            {/* Bottom Right Wave & Note */}
+            <div className="p8-corner-wave bottom-right" />
+            <div className="p8-bottom-right-note">
+              <span>Thank you<br/>for being you<br/>♡</span>
+            </div>
+
+            {/* Main Center Content */}
+            <div className="p8-center-body">
+              {/* Header Tag */}
+              <div className="p8-special-tag">— TEACHERS' DAY SPECIAL —</div>
+
+              {/* "Your Result" with Sunshine Sparkles */}
+              <div className="p8-result-title-row">
+                <span className="p8-sun-ray">✨</span>
+                <h2 className="p8-your-result-text">Your Result</h2>
+                <span className="p8-sun-ray">✨</span>
+              </div>
+              <div className="p8-teal-swoosh" />
+
+              {/* Main Headline with Yellow Highlighter Banner */}
+              <div className="p8-headline-wrap">
+                <div className="p8-prefix-text">
+                  {userName ? `${userName}, You're a` : "You're a"}
+                </div>
+                <div className="p8-tier-highlighter-badge">
+                  {activeTier.label}!
+                </div>
+              </div>
+
+              {/* Personalized Subtitle */}
+              <p className="p8-desc-subtitle">
+                {activeTier.desc || activeTier.message}
+              </p>
+
+              {/* Stats Pill (Score & Time Taken) */}
+              <div className="p8-stats-pill-container">
+                <div className="p8-stat-col">
+                  <div className="p8-stat-circle yellow">✓</div>
+                  <div className="p8-stat-labels">
+                    <span className="p8-stat-title">Score</span>
+                    <span className="p8-stat-val">{score} / 5</span>
+                  </div>
+                </div>
+
+                <div className="p8-stat-divider" />
+
+                <div className="p8-stat-col">
+                  <div className="p8-stat-circle teal">🕒</div>
+                  <div className="p8-stat-labels">
+                    <span className="p8-stat-title">Time Taken</span>
+                    <span className="p8-stat-val">{displayTime}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section: Here's what your score means */}
+              <div className="p8-means-heading">Here's what your score means:</div>
+
+              {/* 5 Tier Cards Horizontal Row */}
+              <div className="p8-cards-grid">
+                {SCORE_TIERS.map((tierObj) => {
+                  const isCurrentTier = score >= tierObj.minScore && score <= tierObj.maxScore;
+                  return (
+                    <div
+                      key={tierObj.label}
+                      className={`p8-tier-box ${isCurrentTier ? 'active' : ''}`}
+                    >
+                      <div className="p8-box-icon">{tierObj.icon}</div>
+                      <div className="p8-box-pill">{tierObj.label}</div>
+                      <div className="p8-box-score">{tierObj.scoreDisplay}</div>
+                      <p className="p8-box-desc">{tierObj.desc}</p>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Play Again Button */}
               <button
                 type="button"
-                className="p8-paper-play-again-hotspot"
+                className="p8-play-again-cta"
                 data-clickable="true"
-                title="Play Again"
                 onClick={(e) => {
                   stopCapture(e);
                   restartQuiz();
@@ -64,12 +171,14 @@ export const QuizPageOverlay = () => {
                 onMouseDown={stopCapture}
                 onPointerDown={stopCapture}
                 onTouchStart={stopCapture}
-              />
+              >
+                <span>Play Again →</span>
+              </button>
             </div>
           </div>
         </div>
 
-        {/* Floating Bottom Bar with Restart and Navigation */}
+        {/* Bottom Navigation Toolbar */}
         <div
           className="quiz-bottom-bar-wrapper"
           data-clickable="true"
