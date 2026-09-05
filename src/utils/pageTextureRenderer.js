@@ -320,7 +320,7 @@ export async function renderQuizPageTexture(materialIndex, questionData, questio
 
 export const DEFAULT_PAGE8_SETTINGS = {
   // Theme & Atmosphere
-  bgTheme: 'sunshine', // 'sunshine' | 'vanilla' | 'mint' | 'rose' | 'lavender'
+  bgTheme: 'vanilla',
   showDoodles: true,
   showSparkles: true,
   showBooks: true,
@@ -331,24 +331,24 @@ export const DEFAULT_PAGE8_SETTINGS = {
   resultTitle: 'Your Result ✨',
   titleFontSize: 50,
   teacherPrefix: '',
-  customBadgeText: '', // Empty = use resultData.label
+  customBadgeText: '',
   badgeColor: '#FDE047',
   badgeFontSize: 48,
   customDescText: '',
   descFontSize: 20,
-  scoreOverride: -1, // -1 = use real score, 0..5 = override
-  statsPillScale: 1.0,
+  scoreOverride: -1,
+  statsPillScale: 1.1,
 
   // Right Page
   postItAngle: 0.06,
-  postItLine1: 'Great Teachers',
-  postItLine2: 'Make a',
-  postItLine3: 'Bigger World',
+  postItLine1: '',
+  postItLine2: '',
+  postItLine3: '',
   postItEmoji: '♡',
   sectionTitle: 'YOUR PERFORMANCE TIERS',
-  tierCardHeight: 108,
-  tierCardGap: 16,
-  tierCardFontSize: 15,
+  tierCardHeight: 134,
+  tierCardGap: 25,
+  tierCardFontSize: 17,
   playAgainBtnText: 'Play Again ↺',
   playAgainBtnColor: '#FBBF24',
   bottomRightNote: 'Thank you for shaping tomorrow ♡',
@@ -722,7 +722,7 @@ export async function renderResultPageTexture(resultData, score, userName, timeT
     const rightMidX = 1575 * scale;
 
     // Top-Right Sticky Note (Post-it) with Shadow & Washi Tape
-    if (cfg.showDoodles && (cfg.postItLine1 || cfg.postItLine2 || cfg.postItLine3)) {
+    if (cfg.showDoodles && (cfg.postItLine1 || cfg.postItLine2 || cfg.postItLine3 || cfg.postItEmoji)) {
       ctx.save();
       const postX = W - 330 * scale;
       const postY = 55 * scale;
