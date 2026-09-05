@@ -168,24 +168,19 @@ export async function renderQuizPageTexture(materialIndex, questionData, questio
       const cardY = cardStartY + idx * (cardH + cardGap);
       const isSelected = selectedOptionIndex === idx;
 
-      // Card Background & Outline
+      // Card Background & Outline (Clean highlight without blurry glow)
       drawRoundedRect(ctx, rightX, cardY, rightW, cardH, 12 * scale);
       if (isSelected) {
-        // Vibrant Orange Highlight Fill for selected answer
-        ctx.fillStyle = 'rgba(255, 175, 45, 0.48)';
+        // Clean warm highlight fill
+        ctx.fillStyle = 'rgba(232, 167, 53, 0.22)';
         ctx.fill();
 
-        // White halo under orange stroke for maximum clarity on texture
-        ctx.lineWidth = 6 * scale;
-        ctx.strokeStyle = '#FFFFFF';
-        ctx.stroke();
-
-        // Rich Orange Border
-        ctx.lineWidth = 3.5 * scale;
-        ctx.strokeStyle = '#D97706';
+        // Crisp solid border
+        ctx.lineWidth = 3 * scale;
+        ctx.strokeStyle = '#000000';
         ctx.stroke();
       } else {
-        ctx.lineWidth = 2.5 * scale;
+        ctx.lineWidth = 2 * scale;
         ctx.strokeStyle = '#000000';
         ctx.stroke();
       }
@@ -198,11 +193,11 @@ export async function renderQuizPageTexture(materialIndex, questionData, questio
       ctx.beginPath();
       ctx.arc(circleX, circleY, circleR, 0, Math.PI * 2);
       if (isSelected) {
-        // Orange badge with black text
+        // Solid Orange badge with black text
         ctx.fillStyle = '#E8A735';
         ctx.fill();
-        ctx.lineWidth = 2.5 * scale;
-        ctx.strokeStyle = '#92400E';
+        ctx.lineWidth = 2 * scale;
+        ctx.strokeStyle = '#000000';
         ctx.stroke();
 
         ctx.font = `900 ${16 * scale}px sans-serif`;
@@ -239,14 +234,9 @@ export async function renderQuizPageTexture(materialIndex, questionData, questio
 
       // Checkmark for selected
       if (isSelected) {
-        ctx.font = `900 ${24 * scale}px sans-serif`;
+        ctx.font = `900 ${22 * scale}px sans-serif`;
         ctx.textAlign = 'right';
-        ctx.lineJoin = 'round';
-        ctx.lineWidth = 4 * scale;
-        ctx.strokeStyle = '#FFFFFF';
-        ctx.strokeText('✓', rightX + rightW - 16 * scale, cardY + cardH / 2);
-        ctx.fillStyle = '#D97706';
-        ctx.fillText('✓', rightX + rightW - 16 * scale, cardY + cardH / 2);
+        drawStrokedText('✓', rightX + rightW - 16 * scale, cardY + cardH / 2);
         ctx.textAlign = 'left';
       }
     });
@@ -357,18 +347,27 @@ export async function renderAllQuizTextures(questions, answers, score, userName,
     const matIdx = i + 2; // 2..6 -> Pages 3..7
     const q = questions[i];
     if (q) {
+      // Calculate score of previous questions (0 to i - 1) so current question does not reveal right/wrong until moving next
+      const prevScore = questions.slice(0, i).reduce((acc, prevQ, prevIdx) => {
+        const chosen = answers[prevIdx];
+        if (chosen !== undefined && prevQ.options[chosen]?.isCorrect) {
+          return acc + 1;
+        }
+        return acc;
+      }, 0);
+
       await renderQuizPageTexture(
         matIdx,
         q,
         i + 1,
         5,
         answers[i],
-        score,
+        prevScore,
         userName
       );
     }
   }
 
-  // Render Page 8
+  // Render Page 8 with total final score
   await renderResultPageTexture(resultData, score, userName);
 }

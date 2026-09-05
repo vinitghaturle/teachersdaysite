@@ -92,6 +92,15 @@ export const QuizPageOverlay = () => {
   const isAnswered = selectedOptionIndex !== undefined;
   const isLastQuestion = questionIndex === 4;
 
+  // Score of questions submitted before the current question (so current question does not reveal right/wrong)
+  const visibleScore = questions.slice(0, questionIndex).reduce((acc, prevQ, prevIdx) => {
+    const chosenOpt = answers[prevIdx];
+    if (chosenOpt !== undefined && prevQ.options[chosenOpt]?.isCorrect) {
+      return acc + 1;
+    }
+    return acc;
+  }, 0);
+
   const handleOptionSelect = (e, optionIdx) => {
     stopCapture(e);
     selectAnswer(questionIndex, optionIdx);
@@ -202,9 +211,9 @@ export const QuizPageOverlay = () => {
             </div>
           </div>
 
-          {/* Score Counter */}
+          {/* Score Counter: shows previous submitted score until next question is clicked */}
           <div className="quiz-bar-score-display">
-            <span>Score: <strong>{score}/5</strong></span>
+            <span>Score: <strong>{visibleScore}/5</strong></span>
           </div>
 
           {/* Next button */}
