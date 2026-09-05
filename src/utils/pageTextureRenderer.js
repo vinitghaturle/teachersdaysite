@@ -237,18 +237,55 @@ export async function renderQuizPageTexture(materialIndex, questionData, questio
       }
     });
 
+let transparent1x1Texture = null;
+
+function getTransparentTexture() {
+  if (transparent1x1Texture) return transparent1x1Texture;
+  if (!window.THREE) return null;
+  const c = document.createElement('canvas');
+  c.width = 2;
+  c.height = 2;
+  const t = new window.THREE.CanvasTexture(c);
+  t.flipY = false;
+  transparent1x1Texture = t;
+  return t;
+}
+
+function applyTextureToMaterial(mat, canvas) {
+  if (!mat || !window.THREE) return;
+  const canvasTex = new window.THREE.CanvasTexture(canvas);
+  canvasTex.flipY = false;
+  canvasTex.anisotropy = 8;
+  canvasTex.premultiplyAlpha = false;
+
+  const emptyTex = getTransparentTexture();
+
+  mat.map = canvasTex;
+  if (Array.isArray(mat.textures)) {
+    mat.textures[0] = canvasTex;
+    for (let i = 1; i < mat.textures.length; i++) {
+      mat.textures[i] = emptyTex;
+    }
+  }
+
+  // Clear any shader layer uniforms so old illustrations/lines don't blend over canvas
+  if (mat.userData && mat.userData.shader && mat.userData.shader.uniforms) {
+    const u = mat.userData.shader.uniforms;
+    if (u.map) u.map.value = canvasTex;
+    if (u.map2 && emptyTex) u.map2.value = emptyTex;
+    if (u.map3 && emptyTex) u.map3.value = emptyTex;
+    if (u.map4 && emptyTex) u.map4.value = emptyTex;
+    if (u.map5 && emptyTex) u.map5.value = emptyTex;
+    if (u.map6 && emptyTex) u.map6.value = emptyTex;
+  }
+
+  mat.needsUpdate = true;
+}
+
     // Update Three.js Texture directly on the 3D book material
     if (window.Main && window.Main.maskRevealView && window.Main.maskRevealView.pageMaterials) {
       const mat = window.Main.maskRevealView.pageMaterials[materialIndex];
-      if (mat && window.THREE) {
-        const canvasTex = new window.THREE.CanvasTexture(canvas);
-        canvasTex.flipY = false;
-        canvasTex.anisotropy = 8;
-        canvasTex.premultiplyAlpha = false;
-        mat.map = canvasTex;
-        mat.textures[0] = canvasTex;
-        mat.needsUpdate = true;
-      }
+      applyTextureToMaterial(mat, canvas);
     }
   } catch (err) {
     console.error('Error rendering quiz page texture:', err);
@@ -689,14 +726,18 @@ export async function renderResultPageTexture(resultData, score, userName, timeT
     // Update Three.js texture
     if (window.Main && window.Main.maskRevealView && window.Main.maskRevealView.pageMaterials) {
       const mat = window.Main.maskRevealView.pageMaterials[materialIndex];
-      if (mat && window.THREE) {
-        const canvasTex = new window.THREE.CanvasTexture(canvas);
-        canvasTex.flipY = false;
-        canvasTex.anisotropy = 8;
-        canvasTex.premultiplyAlpha = false;
-        mat.map = canvasTex;
-        mat.textures[0] = canvasTex;
-        mat.needsUpdate = true;
+      applyTextureToMaterial(mat, canvas);
+
+      // Also ensure pages[7] and pages[6].children[1] receive the material
+      if (window.Main.maskRevealView.pages) {
+        const p7 = window.Main.maskRevealView.pages[7];
+        if (p7 && p7.children && p7.children[0]) {
+          applyTextureToMaterial(p7.children[0].material, canvas);
+        }
+        const p6 = window.Main.maskRevealView.pages[6];
+        if (p6 && p6.children && p6.children[1]) {
+          applyTextureToMaterial(p6.children[1].material, canvas);
+        }
       }
     }
   } catch (err) {
