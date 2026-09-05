@@ -59,6 +59,90 @@ function drawRoundedRect(ctx, x, y, width, height, radius) {
   ctx.closePath();
 }
 
+let transparentTexture = null;
+function getTransparentTexture() {
+  if (!transparentTexture && typeof document !== 'undefined' && window.THREE) {
+    const c = document.createElement('canvas');
+    c.width = 16;
+    c.height = 16;
+    const ctx = c.getContext('2d');
+    ctx.clearRect(0, 0, 16, 16);
+    transparentTexture = new window.THREE.CanvasTexture(c);
+    transparentTexture.needsUpdate = true;
+  }
+  return transparentTexture;
+}
+
+/**
+ * Replace material map with dynamic canvas texture and silence parallax foreground layers
+ */
+function applyTextureToMaterial(mat, canvas) {
+  if (!mat || !window.THREE) return;
+  const canvasTex = new window.THREE.CanvasTexture(canvas);
+  canvasTex.flipY = false;
+  canvasTex.anisotropy = 8;
+  canvasTex.premultiplyAlpha = false;
+  canvasTex.needsUpdate = true;
+
+  if (window.Main && window.Main.maskRevealView && window.Main.maskRevealView.renderer) {
+    try {
+      window.Main.maskRevealView.renderer.initTexture(canvasTex);
+    } catch (_) {}
+  }
+
+  mat.map = canvasTex;
+  mat._customCanvasTexture = canvasTex;
+  const emptyTex = getTransparentTexture();
+
+  if (Array.isArray(mat.textures)) {
+    mat.textures[0] = canvasTex;
+    if (emptyTex) {
+      for (let i = 1; i < mat.textures.length; i++) {
+        mat.textures[i] = emptyTex;
+      }
+    }
+  }
+
+  // Disable parallax sprite layers so nothing obscures the canvas
+  if (mat.userData && mat.userData.shader && mat.userData.shader.uniforms) {
+    const u = mat.userData.shader.uniforms;
+    if (u.map) u.map.value = canvasTex;
+    if (emptyTex) {
+      if (u.map2) u.map2.value = emptyTex;
+      if (u.map3) u.map3.value = emptyTex;
+      if (u.map4) u.map4.value = emptyTex;
+      if (u.map5) u.map5.value = emptyTex;
+      if (u.map6) u.map6.value = emptyTex;
+    }
+    const offscreen = new window.THREE.Vector4(99999, 99999, 0.001, 0.001);
+    if (u.map2Dimensions) u.map2Dimensions.value = offscreen;
+    if (u.map3Dimensions) u.map3Dimensions.value = offscreen;
+    if (u.map4Dimensions) u.map4Dimensions.value = offscreen;
+    if (u.map5Dimensions) u.map5Dimensions.value = offscreen;
+    if (u.map6Dimensions) u.map6Dimensions.value = offscreen;
+  }
+
+  const originalOnBefore = mat.onBeforeCompile;
+  mat.onBeforeCompile = function(shader, renderer) {
+    if (originalOnBefore) {
+      originalOnBefore.call(this, shader, renderer);
+    }
+    if (this._customCanvasTexture) {
+      shader.uniforms.map.value = this._customCanvasTexture;
+      const empty = getTransparentTexture();
+      if (empty) {
+        if (shader.uniforms.map2) shader.uniforms.map2.value = empty;
+        if (shader.uniforms.map3) shader.uniforms.map3.value = empty;
+        if (shader.uniforms.map4) shader.uniforms.map4.value = empty;
+        if (shader.uniforms.map5) shader.uniforms.map5.value = empty;
+        if (shader.uniforms.map6) shader.uniforms.map6.value = empty;
+      }
+    }
+  };
+
+  mat.needsUpdate = true;
+}
+
 /**
  * Render a single quiz page directly onto the material's texture in Three.js
  */
@@ -80,7 +164,6 @@ export async function renderQuizPageTexture(materialIndex, questionData, questio
 
     const scale = W / 1600;
 
-    // Helper for stroking 2px white outline + black fill
     const drawStrokedText = (text, x, y) => {
       ctx.lineJoin = 'round';
       ctx.lineWidth = 4 * scale;
@@ -102,7 +185,6 @@ export async function renderQuizPageTexture(materialIndex, questionData, questio
     const tagW = ctx.measureText(qnumText).width + 20 * scale;
     const tagH = 30 * scale;
     
-    // Draw Tag Border
     drawRoundedRect(ctx, leftX, 120 * scale, tagW, tagH, 6 * scale);
     ctx.lineWidth = 2.5 * scale;
     ctx.strokeStyle = '#000000';
@@ -147,16 +229,13 @@ export async function renderQuizPageTexture(materialIndex, questionData, questio
     const rightW = 580 * scale;
     const optionLabels = ['1', '2', '3', '4'];
 
-    // Header Title
     ctx.font = `800 ${16 * scale}px sans-serif`;
     drawStrokedText('CHOOSE AN OPTION (1 - 4):', rightX, 135 * scale);
 
-    // Points Badge (+1 pt)
     ctx.textAlign = 'right';
     drawStrokedText('+1 pt', rightX + rightW, 135 * scale);
     ctx.textAlign = 'left';
 
-    // 4 Option Cards
     const cardH = 68 * scale;
     const cardGap = 16 * scale;
     const cardStartY = 175 * scale;
@@ -165,14 +244,10 @@ export async function renderQuizPageTexture(materialIndex, questionData, questio
       const cardY = cardStartY + idx * (cardH + cardGap);
       const isSelected = selectedOptionIndex === idx;
 
-      // Card Background & Outline (Clean highlight without blurry glow)
       drawRoundedRect(ctx, rightX, cardY, rightW, cardH, 12 * scale);
       if (isSelected) {
-        // Clean warm highlight fill
         ctx.fillStyle = 'rgba(232, 167, 53, 0.22)';
         ctx.fill();
-
-        // Crisp solid border
         ctx.lineWidth = 3 * scale;
         ctx.strokeStyle = '#000000';
         ctx.stroke();
@@ -182,7 +257,6 @@ export async function renderQuizPageTexture(materialIndex, questionData, questio
         ctx.stroke();
       }
 
-      // Option Number Badge (Circle)
       const circleX = rightX + 28 * scale;
       const circleY = cardY + cardH / 2;
       const circleR = 16 * scale;
@@ -190,7 +264,6 @@ export async function renderQuizPageTexture(materialIndex, questionData, questio
       ctx.beginPath();
       ctx.arc(circleX, circleY, circleR, 0, Math.PI * 2);
       if (isSelected) {
-        // Solid Orange badge with black text
         ctx.fillStyle = '#E8A735';
         ctx.fill();
         ctx.lineWidth = 2 * scale;
@@ -212,7 +285,6 @@ export async function renderQuizPageTexture(materialIndex, questionData, questio
         drawStrokedText(optionLabels[idx], circleX, circleY);
       }
 
-      // Option Text
       ctx.textAlign = 'left';
       ctx.font = `700 ${18 * scale}px sans-serif`;
       const textX = rightX + 56 * scale;
@@ -229,7 +301,6 @@ export async function renderQuizPageTexture(materialIndex, questionData, questio
         });
       }
 
-      // Checkmark for selected
       if (isSelected) {
         ctx.font = `900 ${22 * scale}px sans-serif`;
         ctx.textAlign = 'right';
@@ -238,89 +309,6 @@ export async function renderQuizPageTexture(materialIndex, questionData, questio
       }
     });
 
-let transparentTexture = null;
-function getTransparentTexture() {
-  if (!transparentTexture && typeof document !== 'undefined' && window.THREE) {
-    const c = document.createElement('canvas');
-    c.width = 16;
-    c.height = 16;
-    const ctx = c.getContext('2d');
-    ctx.clearRect(0, 0, 16, 16);
-    transparentTexture = new window.THREE.CanvasTexture(c);
-    transparentTexture.needsUpdate = true;
-  }
-  return transparentTexture;
-}
-
-function applyTextureToMaterial(mat, canvas) {
-  if (!mat || !window.THREE) return;
-  const canvasTex = new window.THREE.CanvasTexture(canvas);
-  canvasTex.flipY = false;
-  canvasTex.anisotropy = 8;
-  canvasTex.premultiplyAlpha = false;
-  canvasTex.needsUpdate = true;
-
-  if (window.Main && window.Main.maskRevealView && window.Main.maskRevealView.renderer) {
-    try {
-      window.Main.maskRevealView.renderer.initTexture(canvasTex);
-    } catch (_) {}
-  }
-
-  mat.map = canvasTex;
-  mat._customCanvasTexture = canvasTex;
-  const emptyTex = getTransparentTexture();
-
-  if (Array.isArray(mat.textures)) {
-    mat.textures[0] = canvasTex;
-    if (emptyTex) {
-      for (let i = 1; i < mat.textures.length; i++) {
-        mat.textures[i] = emptyTex;
-      }
-    }
-  }
-
-  // Shift layer offsets & assign empty transparent textures so old art doesn't overlay canvas
-  if (mat.userData && mat.userData.shader && mat.userData.shader.uniforms) {
-    const u = mat.userData.shader.uniforms;
-    if (u.map) u.map.value = canvasTex;
-    if (emptyTex) {
-      if (u.map2) u.map2.value = emptyTex;
-      if (u.map3) u.map3.value = emptyTex;
-      if (u.map4) u.map4.value = emptyTex;
-      if (u.map5) u.map5.value = emptyTex;
-      if (u.map6) u.map6.value = emptyTex;
-    }
-    const offscreen = new window.THREE.Vector4(99999, 99999, 0.001, 0.001);
-    if (u.map2Dimensions) u.map2Dimensions.value = offscreen;
-    if (u.map3Dimensions) u.map3Dimensions.value = offscreen;
-    if (u.map4Dimensions) u.map4Dimensions.value = offscreen;
-    if (u.map5Dimensions) u.map5Dimensions.value = offscreen;
-    if (u.map6Dimensions) u.map6Dimensions.value = offscreen;
-  }
-
-  // Hook onBeforeCompile in case material compiles later
-  const originalOnBefore = mat.onBeforeCompile;
-  mat.onBeforeCompile = function(shader, renderer) {
-    if (originalOnBefore) {
-      originalOnBefore.call(this, shader, renderer);
-    }
-    if (this._customCanvasTexture) {
-      shader.uniforms.map.value = this._customCanvasTexture;
-      const empty = getTransparentTexture();
-      if (empty) {
-        if (shader.uniforms.map2) shader.uniforms.map2.value = empty;
-        if (shader.uniforms.map3) shader.uniforms.map3.value = empty;
-        if (shader.uniforms.map4) shader.uniforms.map4.value = empty;
-        if (shader.uniforms.map5) shader.uniforms.map5.value = empty;
-        if (shader.uniforms.map6) shader.uniforms.map6.value = empty;
-      }
-    }
-  };
-
-  mat.needsUpdate = true;
-}
-
-    // Update Three.js Texture directly on the 3D book material
     if (window.Main && window.Main.maskRevealView && window.Main.maskRevealView.pageMaterials) {
       const mat = window.Main.maskRevealView.pageMaterials[materialIndex];
       applyTextureToMaterial(mat, canvas);
