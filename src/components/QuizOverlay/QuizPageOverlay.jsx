@@ -4,14 +4,14 @@ import { QuizSizeController } from '../DevController/QuizSizeController';
 import './QuizPageOverlay.css';
 
 const DEFAULT_SETTINGS = {
-  widthPercent: 80,
+  widthPercent: 71,
   heightPercent: 80,
-  offsetY: 0,
+  offsetY: 14,
   questionFontSize: 20,
   optionFontSize: 13,
-  spreadGap: 36,
-  optionPadding: 9,
-  borderWidth: 1.5,
+  spreadGap: 30,
+  optionPadding: 7,
+  borderWidth: 2.5,
 };
 
 export const QuizPageOverlay = () => {
@@ -25,8 +25,6 @@ export const QuizPageOverlay = () => {
     selectAnswer,
     restartQuiz,
     goToPage,
-    showResultModal,
-    setShowResultModal,
     resultData,
   } = useQuiz();
 
@@ -39,8 +37,8 @@ export const QuizPageOverlay = () => {
     }
   });
 
-  // Only active when book is opened and on quiz pages 3 to 7
-  if (!isBookEntered || currentPage < 3 || currentPage > 7) {
+  // Only active when book is opened and on quiz pages 3 to 8
+  if (!isBookEntered || currentPage < 3 || currentPage > 8) {
     return null;
   }
 
@@ -48,6 +46,125 @@ export const QuizPageOverlay = () => {
     e.stopPropagation();
   };
 
+  // Page 8: Result Screen embedded on book page
+  if (currentPage === 8) {
+    return (
+      <>
+        <div
+          className="quiz-page-container quiz-result-page-container"
+          data-clickable="true"
+          onMouseDown={stopCapture}
+          onPointerDown={stopCapture}
+          onTouchStart={stopCapture}
+          style={{
+            width: `calc(var(--bookPixelWidth, 880px) * ${settings.widthPercent / 100})`,
+            minHeight: `calc(var(--bookPixelWidth, 880px) * 0.57143 * ${settings.heightPercent / 100})`,
+            transform: `translate(-50%, calc(-50% + ${settings.offsetY}px))`,
+          }}
+        >
+          <div
+            className="quiz-book-spread"
+            style={{ gap: `${settings.spreadGap}px` }}
+          >
+            {/* LEFT PAGE: Score & Badges */}
+            <div className="quiz-left-page quiz-result-left" data-clickable="true">
+              <div className="quiz-header-meta">
+                <span
+                  className="quiz-qnum-tag"
+                  style={{ borderWidth: `${settings.borderWidth}px` }}
+                >
+                  FINAL RESULT
+                </span>
+                <span
+                  className="quiz-difficulty-tag"
+                  style={{ borderWidth: `${settings.borderWidth}px` }}
+                >
+                  {resultData.score}
+                </span>
+              </div>
+
+              <div className="quiz-result-score-block">
+                <div className="quiz-result-icon">{resultData.badge}</div>
+                <h2 className="quiz-result-title">{resultData.label}</h2>
+                {userName && (
+                  <p className="quiz-result-teacher-name">
+                    Dedicated to: <strong>{userName}</strong>
+                  </p>
+                )}
+              </div>
+
+              <div
+                className="quiz-result-stats-row"
+                style={{ borderTopWidth: `${settings.borderWidth}px` }}
+              >
+                <div className="quiz-stat-pill" style={{ borderWidth: `${settings.borderWidth}px` }}>
+                  <span>Correct: <strong>{score}/5</strong></span>
+                </div>
+                <div className="quiz-stat-pill" style={{ borderWidth: `${settings.borderWidth}px` }}>
+                  <span>Accuracy: <strong>{Math.round((score / 5) * 100)}%</strong></span>
+                </div>
+              </div>
+            </div>
+
+            {/* RIGHT PAGE: Message & Actions */}
+            <div className="quiz-right-page quiz-result-right" data-clickable="true">
+              <div className="quiz-options-header">
+                <span className="quiz-options-title">The Compliment</span>
+                <span
+                  className="quiz-points-badge"
+                  style={{ borderWidth: `${settings.borderWidth}px` }}
+                >
+                  Teacher's Day
+                </span>
+              </div>
+
+              <div className="quiz-result-message-box">
+                <p className="quiz-result-description">
+                  "{resultData.message}"
+                </p>
+              </div>
+
+              <div
+                className="quiz-actions-row"
+                style={{ borderTopWidth: `${settings.borderWidth}px` }}
+              >
+                <button
+                  type="button"
+                  className="quiz-prev-btn"
+                  data-clickable="true"
+                  onClick={() => goToPage(7)}
+                  onMouseDown={stopCapture}
+                  onPointerDown={stopCapture}
+                  onTouchStart={stopCapture}
+                  style={{ borderWidth: `${settings.borderWidth}px` }}
+                >
+                  ← Review Q5
+                </button>
+
+                <button
+                  type="button"
+                  className="quiz-next-btn"
+                  data-clickable="true"
+                  onClick={restartQuiz}
+                  onMouseDown={stopCapture}
+                  onPointerDown={stopCapture}
+                  onTouchStart={stopCapture}
+                  style={{ borderWidth: `${settings.borderWidth}px` }}
+                >
+                  <span>🔄 Try 5 New Questions</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Floating Dev Controller for Live Tuning */}
+        <QuizSizeController settings={settings} setSettings={setSettings} />
+      </>
+    );
+  }
+
+  // Quiz questions for Pages 3..7
   const questionIndex = currentPage - 3; // 0, 1, 2, 3, 4
   const question = questions[questionIndex];
   if (!question) return null;
@@ -61,11 +178,8 @@ export const QuizPageOverlay = () => {
   };
 
   const handleNext = () => {
-    if (isLastQuestion) {
-      setShowResultModal(true);
-    } else {
-      goToPage(currentPage + 1);
-    }
+    // Go to next page (Page 7 -> Page 8 for results)
+    goToPage(currentPage + 1);
   };
 
   const handlePrev = () => {
@@ -227,7 +341,7 @@ export const QuizPageOverlay = () => {
                 style={{ borderWidth: `${settings.borderWidth}px` }}
               >
                 <span>
-                  {isLastQuestion ? 'View Results 🎉' : 'Next Question →'}
+                  {isLastQuestion ? 'Next → (Page 8 Result)' : 'Next Question →'}
                 </span>
               </button>
             </div>
@@ -237,68 +351,9 @@ export const QuizPageOverlay = () => {
 
       {/* Floating Dev Controller for Live Tuning */}
       <QuizSizeController settings={settings} setSettings={setSettings} />
-
-      {/* Result Screen Modal */}
-      {showResultModal && (
-        <div
-          className="quiz-result-overlay"
-          data-clickable="true"
-          onMouseDown={stopCapture}
-          onPointerDown={stopCapture}
-          onTouchStart={stopCapture}
-        >
-          <div className="quiz-result-card" data-clickable="true">
-            <div className="quiz-result-badge-icon">{resultData.badge}</div>
-            <div className="quiz-result-score-tag">{resultData.score}</div>
-            <h2 className="quiz-result-label">{resultData.label}</h2>
-            <p className="quiz-result-message">{resultData.message}</p>
-
-            <div className="quiz-result-stats">
-              <div className="quiz-stat-box">
-                <span className="quiz-stat-number">{score}</span>
-                <span className="quiz-stat-title">Correct</span>
-              </div>
-              <div className="quiz-stat-box">
-                <span className="quiz-stat-number">{5 - score}</span>
-                <span className="quiz-stat-title">Missed</span>
-              </div>
-              <div className="quiz-stat-box">
-                <span className="quiz-stat-number">
-                  {Math.round((score / 5) * 100)}%
-                </span>
-                <span className="quiz-stat-title">Accuracy</span>
-              </div>
-            </div>
-
-            <div className="quiz-result-buttons">
-              <button
-                type="button"
-                className="quiz-retry-btn"
-                data-clickable="true"
-                onClick={restartQuiz}
-                onMouseDown={stopCapture}
-                onPointerDown={stopCapture}
-                onTouchStart={stopCapture}
-              >
-                <span>🔄 Try 5 New Questions</span>
-              </button>
-              <button
-                type="button"
-                className="quiz-close-btn"
-                data-clickable="true"
-                onClick={() => setShowResultModal(false)}
-                onMouseDown={stopCapture}
-                onPointerDown={stopCapture}
-                onTouchStart={stopCapture}
-              >
-                <span>Review Pages</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 };
+
 
 

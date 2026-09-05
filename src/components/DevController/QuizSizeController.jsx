@@ -2,14 +2,14 @@ import React, { useState, useEffect } from 'react';
 import './QuizSizeController.css';
 
 const DEFAULT_SETTINGS = {
-  widthPercent: 80,
+  widthPercent: 71,
   heightPercent: 80,
-  offsetY: 0,
+  offsetY: 14,
   questionFontSize: 20,
   optionFontSize: 13,
-  spreadGap: 36,
-  optionPadding: 9,
-  borderWidth: 1.5,
+  spreadGap: 30,
+  optionPadding: 7,
+  borderWidth: 2.5,
 };
 
 export const QuizSizeController = ({ settings, setSettings }) => {
