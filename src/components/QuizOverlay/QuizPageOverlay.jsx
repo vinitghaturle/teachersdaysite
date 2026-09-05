@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useQuiz } from '../../context/QuizContext';
+import { SCORE_TIERS } from '../../data/questionBank';
 import './QuizPageOverlay.css';
 
 export const QuizPageOverlay = () => {
@@ -14,6 +15,7 @@ export const QuizPageOverlay = () => {
     restartQuiz,
     goToPage,
     resultData,
+    timeTaken,
   } = useQuiz();
 
   // Only active when book is opened and on quiz pages 3 to 8
@@ -30,56 +32,92 @@ export const QuizPageOverlay = () => {
     }
   };
 
-  // Page 8: Dedicated bottom action controls for Result page
+  // Page 8: Everything is rendered directly on the 3D paper background itself!
+  // We provide a transparent hotspot over the on-paper "Play Again →" button plus bottom toolbar.
   if (currentPage === 8) {
     return (
-      <div
-        className="quiz-bottom-bar-wrapper"
-        data-clickable="true"
-        onClick={stopCapture}
-        onMouseDown={stopCapture}
-        onMouseUp={stopCapture}
-        onPointerDown={stopCapture}
-        onPointerUp={stopCapture}
-        onTouchStart={stopCapture}
-        onTouchEnd={stopCapture}
-      >
-        <div className="quiz-bottom-bar" data-clickable="true">
-          <button
-            type="button"
-            className="quiz-bar-btn prev"
-            data-clickable="true"
-            onClick={(e) => {
-              stopCapture(e);
-              goToPage(7);
-            }}
-            onMouseDown={stopCapture}
-            onPointerDown={stopCapture}
-            onTouchStart={stopCapture}
-          >
-            ← Review Q5
-          </button>
-
-          <div className="quiz-bar-score-display">
-            <span>Score: <strong>{score} / 5</strong></span>
+      <>
+        {/* Transparent Hotspot mapped over the "Play Again →" button on the 3D Paper */}
+        <div
+          className="quiz-transparent-hotspot-container"
+          data-clickable="true"
+          onClick={stopCapture}
+          onMouseDown={stopCapture}
+          onMouseUp={stopCapture}
+          onPointerDown={stopCapture}
+          onPointerUp={stopCapture}
+          onTouchStart={stopCapture}
+          onTouchEnd={stopCapture}
+        >
+          <div className="quiz-hotspot-spread">
+            <div className="quiz-hotspot-left" />
+            <div className="quiz-hotspot-right p8-hotspot-right">
+              <button
+                type="button"
+                className="p8-paper-play-again-hotspot"
+                data-clickable="true"
+                title="Play Again"
+                onClick={(e) => {
+                  stopCapture(e);
+                  restartQuiz();
+                }}
+                onMouseDown={stopCapture}
+                onPointerDown={stopCapture}
+                onTouchStart={stopCapture}
+              />
+            </div>
           </div>
-
-          <button
-            type="button"
-            className="quiz-bar-btn restart"
-            data-clickable="true"
-            onClick={(e) => {
-              stopCapture(e);
-              restartQuiz();
-            }}
-            onMouseDown={stopCapture}
-            onPointerDown={stopCapture}
-            onTouchStart={stopCapture}
-          >
-            <span>🔄 Try 5 New Questions</span>
-          </button>
         </div>
-      </div>
+
+        {/* Floating Bottom Bar with Restart and Navigation */}
+        <div
+          className="quiz-bottom-bar-wrapper"
+          data-clickable="true"
+          onClick={stopCapture}
+          onMouseDown={stopCapture}
+          onMouseUp={stopCapture}
+          onPointerDown={stopCapture}
+          onPointerUp={stopCapture}
+          onTouchStart={stopCapture}
+          onTouchEnd={stopCapture}
+        >
+          <div className="quiz-bottom-bar" data-clickable="true">
+            <button
+              type="button"
+              className="quiz-bar-btn prev"
+              data-clickable="true"
+              onClick={(e) => {
+                stopCapture(e);
+                goToPage(7);
+              }}
+              onMouseDown={stopCapture}
+              onPointerDown={stopCapture}
+              onTouchStart={stopCapture}
+            >
+              ← Back to Questions
+            </button>
+
+            <div className="quiz-bar-score-display">
+              <span>Final Score: <strong>{score}/5</strong></span>
+            </div>
+
+            <button
+              type="button"
+              className="quiz-bar-btn restart"
+              data-clickable="true"
+              onClick={(e) => {
+                stopCapture(e);
+                restartQuiz();
+              }}
+              onMouseDown={stopCapture}
+              onPointerDown={stopCapture}
+              onTouchStart={stopCapture}
+            >
+              <span>Play Again ↺</span>
+            </button>
+          </div>
+        </div>
+      </>
     );
   }
 

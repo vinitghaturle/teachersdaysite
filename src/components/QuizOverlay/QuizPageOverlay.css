@@ -61,6 +61,25 @@
   border-color: transparent !important;
 }
 
+/* Page 8 On-Paper Play Again Button Hotspot */
+.quiz-hotspot-right.p8-hotspot-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  padding-bottom: 24px;
+}
+
+.p8-paper-play-again-hotspot {
+  width: 60%;
+  height: 52px;
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer !important;
+  pointer-events: auto !important;
+  border-radius: 26px;
+}
+
 /* 2. Bottom Floating Interactive Toolbar with (1) (2) (3) (4) Circle Buttons */
 .quiz-bottom-bar-wrapper {
   position: fixed;
