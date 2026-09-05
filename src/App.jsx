@@ -3,7 +3,6 @@ import { Header } from './components/Header/Header';
 import { ThreeBookCanvas } from './components/BookEngine/ThreeBookCanvas';
 import { NameInputOverlay } from './components/NameInputOverlay/NameInputOverlay';
 import { QuizPageOverlay } from './components/QuizOverlay/QuizPageOverlay';
-import { FooterLinks } from './components/Footer/FooterLinks';
 import { QuizProvider } from './context/QuizContext';
 import './styles/fonts.css';
 import './styles/main.css';
@@ -22,9 +21,6 @@ export default function App() {
 
       {/* Interactive Quiz Question (Left) & Options (Right) for Pages 3 to 7 */}
       <QuizPageOverlay />
-
-      {/* Bottom Right Share & Typography Attribution */}
-      <FooterLinks />
 
       {/* Invisible Viewport Height Calculator used by engine */}
       <div id="CALC_HEIGHT_DIV" />
