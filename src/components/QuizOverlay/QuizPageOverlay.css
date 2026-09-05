@@ -45,14 +45,14 @@
 .quiz-options-hitbox-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-top: 34px;
+  gap: 16px; /* Added 5-10px vertical gap between options */
+  margin-top: 24px;
   flex: 1;
 }
 
 .quiz-option-hitbox {
   width: 100%;
-  height: 52px;
+  height: 46px;
   background: transparent !important;
   border: none !important;
   outline: none !important;

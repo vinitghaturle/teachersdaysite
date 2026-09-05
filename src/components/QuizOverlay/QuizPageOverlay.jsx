@@ -5,12 +5,12 @@ import './QuizPageOverlay.css';
 
 const DEFAULT_SETTINGS = {
   widthPercent: 71,
-  heightPercent: 80,
-  offsetY: 14,
+  heightPercent: 53,
+  offsetY: -46,
   questionFontSize: 20,
-  optionFontSize: 13,
+  optionFontSize: 11,
   spreadGap: 30,
-  optionPadding: 7,
+  optionPadding: 4,
   borderWidth: 2.5,
 };
 

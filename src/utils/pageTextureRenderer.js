@@ -62,12 +62,33 @@ function drawRoundedRect(ctx, x, y, width, height, radius) {
   ctx.closePath();
 }
 
+export const DEFAULT_LAYOUT_SETTINGS = {
+  widthPercent: 71,
+  heightPercent: 53,
+  offsetY: -46,
+  questionFontSize: 20,
+  optionFontSize: 11,
+  spreadGap: 30,
+  optionPadding: 4,
+  borderWidth: 2.5,
+};
+
+export function getLayoutSettings() {
+  try {
+    const saved = localStorage.getItem('htwkr_quiz_dev_settings');
+    if (saved) return JSON.parse(saved);
+  } catch (e) {}
+  return DEFAULT_LAYOUT_SETTINGS;
+}
+
 /**
  * Render a single quiz page directly onto the material's texture in Three.js
  */
-export async function renderQuizPageTexture(materialIndex, questionData, questionNumber, totalQuestions, selectedOptionIndex, score, userName) {
+export async function renderQuizPageTexture(materialIndex, questionData, questionNumber, totalQuestions, selectedOptionIndex, score, userName, customSettings) {
   const bgSrc = PAGE_BG_MAP[materialIndex];
   if (!bgSrc) return;
+
+  const settings = customSettings || getLayoutSettings();
 
   try {
     const bgImg = await loadImage(bgSrc);
@@ -82,58 +103,70 @@ export async function renderQuizPageTexture(materialIndex, questionData, questio
     ctx.drawImage(bgImg, 0, 0, W, H);
 
     const scale = W / 1600;
+    const strokeWidth = (settings.borderWidth || 2.5) * scale;
 
     // Helper for stroking 2px white outline + black fill
-    const drawStrokedText = (text, x, y) => {
+    const drawStrokedText = (text, x, y, customStroke = strokeWidth) => {
       ctx.lineJoin = 'round';
-      ctx.lineWidth = 4 * scale;
+      ctx.lineWidth = customStroke + 1.5 * scale;
       ctx.strokeStyle = '#FFFFFF';
       ctx.strokeText(text, x, y);
       ctx.fillStyle = '#000000';
       ctx.fillText(text, x, y);
     };
 
+    // Calculate layout boundaries based on spread width & height & offsetY
+    const totalSpreadW = W * (settings.widthPercent / 100);
+    const gapW = settings.spreadGap * scale;
+    const pageW = (totalSpreadW - gapW) / 2;
+    const leftMargin = (W / 2 - gapW / 2 - pageW);
+    const rightMargin = W / 2 + gapW / 2;
+
+    const baseTopY = (H * 0.16) + (settings.offsetY * 1.3 * scale);
+
     // ==========================================
-    // LEFT SPREAD: QUESTION (x: 140 to 720)
+    // LEFT SPREAD: QUESTION
     // ==========================================
-    const leftX = 140 * scale;
-    const leftW = 580 * scale;
+    const leftX = Math.max(80 * scale, leftMargin);
+    const leftW = Math.min(pageW, 600 * scale);
 
     // Tag: QUESTION 0X / 05
-    ctx.font = `800 ${16 * scale}px sans-serif`;
+    const qnumFontSize = Math.max(13, settings.optionFontSize * 1.3) * scale;
+    ctx.font = `800 ${qnumFontSize}px sans-serif`;
     const qnumText = `QUESTION 0${questionNumber} / 05`;
     const tagW = ctx.measureText(qnumText).width + 20 * scale;
-    const tagH = 30 * scale;
+    const tagH = 28 * scale;
     
     // Draw Tag Border
-    drawRoundedRect(ctx, leftX, 120 * scale, tagW, tagH, 6 * scale);
-    ctx.lineWidth = 2.5 * scale;
+    drawRoundedRect(ctx, leftX, baseTopY, tagW, tagH, 6 * scale);
+    ctx.lineWidth = strokeWidth;
     ctx.strokeStyle = '#000000';
     ctx.stroke();
 
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
-    drawStrokedText(qnumText, leftX + 10 * scale, 120 * scale + tagH / 2);
+    drawStrokedText(qnumText, leftX + 10 * scale, baseTopY + tagH / 2);
 
     // Question Prompt (Canela / Georgia Serif)
-    ctx.font = `600 ${28 * scale}px "Canela Web", Georgia, serif`;
+    const promptFontSize = Math.max(18, settings.questionFontSize * 1.2) * scale;
+    ctx.font = `600 ${promptFontSize}px "Canela Web", Georgia, serif`;
     const qLines = wrapText(ctx, `"${questionData.scenario}"`, leftW);
-    const qLineH = 40 * scale;
-    const qStartY = 240 * scale;
+    const qLineH = promptFontSize * 1.4;
+    const qStartY = baseTopY + 54 * scale;
     qLines.forEach((line, idx) => {
       drawStrokedText(line, leftX, qStartY + idx * qLineH);
     });
 
     // Left Footer: Score & Teacher Name
-    const footerY = H - 120 * scale;
+    const footerY = baseTopY + 360 * scale;
     ctx.beginPath();
-    ctx.moveTo(leftX, footerY - 20 * scale);
-    ctx.lineTo(leftX + leftW, footerY - 20 * scale);
-    ctx.lineWidth = 2.5 * scale;
+    ctx.moveTo(leftX, footerY - 16 * scale);
+    ctx.lineTo(leftX + leftW, footerY - 16 * scale);
+    ctx.lineWidth = strokeWidth;
     ctx.strokeStyle = '#000000';
     ctx.stroke();
 
-    ctx.font = `700 ${18 * scale}px sans-serif`;
+    ctx.font = `700 ${16 * scale}px sans-serif`;
     drawStrokedText(`⭐ Score: ${score} / 5`, leftX, footerY);
 
     if (userName) {
@@ -144,40 +177,41 @@ export async function renderQuizPageTexture(materialIndex, questionData, questio
     }
 
     // ==========================================
-    // RIGHT SPREAD: 4 OPTIONS (x: 880 to 1460)
+    // RIGHT SPREAD: 4 OPTIONS
     // ==========================================
-    const rightX = 880 * scale;
-    const rightW = 580 * scale;
+    const rightX = rightMargin;
+    const rightW = Math.min(pageW, 600 * scale);
     const optionLetters = ['A', 'B', 'C', 'D'];
 
     // Header Title
-    ctx.font = `800 ${16 * scale}px sans-serif`;
-    drawStrokedText('SELECT THE BEST COMPLETION:', rightX, 135 * scale);
+    ctx.font = `800 ${14 * scale}px sans-serif`;
+    drawStrokedText('SELECT THE BEST COMPLETION:', rightX, baseTopY + 12 * scale);
 
     // Points Badge (+1 pt)
     ctx.textAlign = 'right';
-    drawStrokedText('+1 pt', rightX + rightW, 135 * scale);
+    drawStrokedText('+1 pt', rightX + rightW, baseTopY + 12 * scale);
     ctx.textAlign = 'left';
 
-    // 4 Option Cards
-    const cardH = 68 * scale;
-    const cardGap = 16 * scale;
-    const cardStartY = 175 * scale;
+    // 4 Option Cards (with 5-10px extra vertical gap)
+    const cardH = 56 * scale;
+    const cardGap = (14 + 8) * scale; // Extra vertical gap
+    const cardStartY = baseTopY + 38 * scale;
+    const optFontSize = Math.max(12, settings.optionFontSize * 1.3) * scale;
 
     questionData.options.forEach((opt, idx) => {
       const cardY = cardStartY + idx * (cardH + cardGap);
       const isSelected = selectedOptionIndex === idx;
 
       // Card Outline (Double border: White outer, Black inner)
-      drawRoundedRect(ctx, rightX, cardY, rightW, cardH, 12 * scale);
-      ctx.lineWidth = isSelected ? 4 * scale : 2.5 * scale;
+      drawRoundedRect(ctx, rightX, cardY, rightW, cardH, 10 * scale);
+      ctx.lineWidth = isSelected ? strokeWidth * 1.5 : strokeWidth;
       ctx.strokeStyle = '#000000';
       ctx.stroke();
 
       // Option Letter Badge (Circle)
-      const circleX = rightX + 28 * scale;
+      const circleX = rightX + 24 * scale;
       const circleY = cardY + cardH / 2;
-      const circleR = 16 * scale;
+      const circleR = 14 * scale;
 
       ctx.beginPath();
       ctx.arc(circleX, circleY, circleR, 0, Math.PI * 2);
@@ -186,13 +220,13 @@ export async function renderQuizPageTexture(materialIndex, questionData, questio
         ctx.fill();
         ctx.fillStyle = '#FFFFFF';
       } else {
-        ctx.lineWidth = 2 * scale;
+        ctx.lineWidth = strokeWidth * 0.8;
         ctx.strokeStyle = '#000000';
         ctx.stroke();
         ctx.fillStyle = '#000000';
       }
 
-      ctx.font = `800 ${16 * scale}px sans-serif`;
+      ctx.font = `800 ${14 * scale}px sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       if (isSelected) {
@@ -203,16 +237,16 @@ export async function renderQuizPageTexture(materialIndex, questionData, questio
 
       // Option Text
       ctx.textAlign = 'left';
-      ctx.font = `700 ${18 * scale}px sans-serif`;
-      const textX = rightX + 56 * scale;
-      const optLines = wrapText(ctx, opt.text, rightW - 90 * scale);
+      ctx.font = `700 ${optFontSize}px sans-serif`;
+      const textX = rightX + 48 * scale;
+      const optLines = wrapText(ctx, opt.text, rightW - 80 * scale);
       
       if (optLines.length === 1) {
         drawStrokedText(optLines[0], textX, cardY + cardH / 2);
       } else {
-        const lineH = 22 * scale;
+        const lineH = optFontSize * 1.25;
         const totalTextH = optLines.length * lineH;
-        const startTextY = cardY + (cardH - totalTextH) / 2 + 10 * scale;
+        const startTextY = cardY + (cardH - totalTextH) / 2 + 8 * scale;
         optLines.forEach((l, lIdx) => {
           drawStrokedText(l, textX, startTextY + lIdx * lineH);
         });
@@ -220,58 +254,58 @@ export async function renderQuizPageTexture(materialIndex, questionData, questio
 
       // Checkmark for selected
       if (isSelected) {
-        ctx.font = `900 ${22 * scale}px sans-serif`;
+        ctx.font = `900 ${20 * scale}px sans-serif`;
         ctx.textAlign = 'right';
-        drawStrokedText('✓', rightX + rightW - 16 * scale, cardY + cardH / 2);
+        drawStrokedText('✓', rightX + rightW - 14 * scale, cardY + cardH / 2);
         ctx.textAlign = 'left';
       }
     });
 
     // Right Page Footer: Next & Back Buttons
-    const btnRowY = H - 120 * scale;
+    const btnRowY = footerY;
     ctx.beginPath();
-    ctx.moveTo(rightX, btnRowY - 20 * scale);
-    ctx.lineTo(rightX + rightW, btnRowY - 20 * scale);
-    ctx.lineWidth = 2.5 * scale;
+    ctx.moveTo(rightX, btnRowY - 16 * scale);
+    ctx.lineTo(rightX + rightW, btnRowY - 16 * scale);
+    ctx.lineWidth = strokeWidth;
     ctx.strokeStyle = '#000000';
     ctx.stroke();
 
     // Back Button (if questionNumber > 1)
     if (questionNumber > 1) {
-      drawRoundedRect(ctx, rightX, btnRowY - 14 * scale, 100 * scale, 36 * scale, 18 * scale);
-      ctx.lineWidth = 2 * scale;
+      drawRoundedRect(ctx, rightX, btnRowY - 12 * scale, 90 * scale, 32 * scale, 16 * scale);
+      ctx.lineWidth = strokeWidth * 0.8;
       ctx.strokeStyle = '#000000';
       ctx.stroke();
-      ctx.font = `800 ${14 * scale}px sans-serif`;
+      ctx.font = `800 ${13 * scale}px sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      drawStrokedText('← Back', rightX + 50 * scale, btnRowY + 4 * scale);
+      drawStrokedText('← Back', rightX + 45 * scale, btnRowY + 4 * scale);
     }
 
     // Next Button (Right aligned)
-    const nextBtnW = 180 * scale;
-    const nextBtnH = 38 * scale;
+    const nextBtnW = 170 * scale;
+    const nextBtnH = 34 * scale;
     const nextBtnX = rightX + rightW - nextBtnW;
     const isAnswered = selectedOptionIndex !== undefined;
     const isLastQ = questionNumber === totalQuestions;
 
-    drawRoundedRect(ctx, nextBtnX, btnRowY - 15 * scale, nextBtnW, nextBtnH, 19 * scale);
+    drawRoundedRect(ctx, nextBtnX, btnRowY - 13 * scale, nextBtnW, nextBtnH, 17 * scale);
     if (isAnswered) {
       ctx.fillStyle = '#000000';
       ctx.fill();
-      ctx.lineWidth = 2 * scale;
+      ctx.lineWidth = strokeWidth * 0.8;
       ctx.strokeStyle = '#FFFFFF';
       ctx.stroke();
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = `800 ${14 * scale}px sans-serif`;
+      ctx.font = `800 ${13 * scale}px sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(isLastQ ? 'Next → (Page 8) 🎉' : 'Next Question →', nextBtnX + nextBtnW / 2, btnRowY + 4 * scale);
     } else {
-      ctx.lineWidth = 2 * scale;
+      ctx.lineWidth = strokeWidth * 0.8;
       ctx.strokeStyle = '#000000';
       ctx.stroke();
-      ctx.font = `800 ${14 * scale}px sans-serif`;
+      ctx.font = `800 ${13 * scale}px sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       drawStrokedText(isLastQ ? 'Next → (Page 8)' : 'Next Question →', nextBtnX + nextBtnW / 2, btnRowY + 4 * scale);
@@ -299,10 +333,12 @@ export async function renderQuizPageTexture(materialIndex, questionData, questio
 /**
  * Render the Page 8 Score & Compliment directly onto the 3D Page 8 texture
  */
-export async function renderResultPageTexture(resultData, score, userName) {
+export async function renderResultPageTexture(resultData, score, userName, customSettings) {
   const materialIndex = 7; // Page 8 is index 7
   const bgSrc = PAGE_BG_MAP[materialIndex];
   if (!bgSrc) return;
+
+  const settings = customSettings || getLayoutSettings();
 
   try {
     const bgImg = await loadImage(bgSrc);
@@ -316,66 +352,69 @@ export async function renderResultPageTexture(resultData, score, userName) {
     // 1. Draw base background artwork
     ctx.drawImage(bgImg, 0, 0, W, H);
     const scale = W / 1600;
+    const strokeWidth = (settings.borderWidth || 2.5) * scale;
 
-    const drawStrokedText = (text, x, y) => {
+    const drawStrokedText = (text, x, y, customStroke = strokeWidth) => {
       ctx.lineJoin = 'round';
-      ctx.lineWidth = 4 * scale;
+      ctx.lineWidth = customStroke + 1.5 * scale;
       ctx.strokeStyle = '#FFFFFF';
       ctx.strokeText(text, x, y);
       ctx.fillStyle = '#000000';
       ctx.fillText(text, x, y);
     };
 
+    const baseTopY = (H * 0.16) + (settings.offsetY * 1.3 * scale);
+
     // Left Page (Score & Title)
     const leftCenterX = 440 * scale;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
-    ctx.font = `${60 * scale}px sans-serif`;
-    ctx.fillText(resultData.badge || '🏆', leftCenterX, 220 * scale);
+    ctx.font = `${52 * scale}px sans-serif`;
+    ctx.fillText(resultData.badge || '🏆', leftCenterX, baseTopY + 40 * scale);
 
-    ctx.font = `800 ${20 * scale}px sans-serif`;
-    drawStrokedText(resultData.score, leftCenterX, 300 * scale);
+    ctx.font = `800 ${18 * scale}px sans-serif`;
+    drawStrokedText(resultData.score, leftCenterX, baseTopY + 110 * scale);
 
-    ctx.font = `700 ${36 * scale}px "Canela Web", Georgia, serif`;
-    drawStrokedText(resultData.label, leftCenterX, 360 * scale);
+    ctx.font = `700 ${32 * scale}px "Canela Web", Georgia, serif`;
+    drawStrokedText(resultData.label, leftCenterX, baseTopY + 165 * scale);
 
     if (userName) {
-      ctx.font = `700 ${22 * scale}px sans-serif`;
-      drawStrokedText(`Dedicated to: ${userName}`, leftCenterX, 420 * scale);
+      ctx.font = `700 ${20 * scale}px sans-serif`;
+      drawStrokedText(`Dedicated to: ${userName}`, leftCenterX, baseTopY + 220 * scale);
     }
 
     // Right Page (Compliment Message)
     const rightCenterX = 1180 * scale;
-    ctx.font = `800 ${22 * scale}px sans-serif`;
-    drawStrokedText("THE TEACHER'S DAY COMPLIMENT", rightCenterX, 220 * scale);
+    ctx.font = `800 ${20 * scale}px sans-serif`;
+    drawStrokedText("THE TEACHER'S DAY COMPLIMENT", rightCenterX, baseTopY + 40 * scale);
 
-    ctx.font = `600 ${26 * scale}px "Canela Web", Georgia, serif`;
+    ctx.font = `600 ${24 * scale}px "Canela Web", Georgia, serif`;
     const msgLines = wrapText(ctx, `"${resultData.message}"`, 560 * scale);
     msgLines.forEach((l, lIdx) => {
-      drawStrokedText(l, rightCenterX, 300 * scale + lIdx * 44 * scale);
+      drawStrokedText(l, rightCenterX, baseTopY + 110 * scale + lIdx * 38 * scale);
     });
 
     // Page 8 Action Buttons (Printed on 3D paper)
-    const p8BtnY = H - 140 * scale;
+    const p8BtnY = baseTopY + 360 * scale;
     // Retry Button
-    const retryW = 240 * scale;
-    const retryH = 44 * scale;
+    const retryW = 230 * scale;
+    const retryH = 40 * scale;
     const retryX = rightCenterX - retryW / 2;
-    drawRoundedRect(ctx, retryX, p8BtnY, retryW, retryH, 22 * scale);
+    drawRoundedRect(ctx, retryX, p8BtnY, retryW, retryH, 20 * scale);
     ctx.fillStyle = '#000000';
     ctx.fill();
-    ctx.lineWidth = 2 * scale;
+    ctx.lineWidth = strokeWidth * 0.8;
     ctx.strokeStyle = '#FFFFFF';
     ctx.stroke();
     ctx.fillStyle = '#FFFFFF';
-    ctx.font = `800 ${16 * scale}px sans-serif`;
+    ctx.font = `800 ${15 * scale}px sans-serif`;
     ctx.fillText('🔄 Try 5 New Questions', rightCenterX, p8BtnY + retryH / 2);
 
     // Review Button
-    ctx.font = `700 ${14 * scale}px sans-serif`;
+    ctx.font = `700 ${13 * scale}px sans-serif`;
     ctx.fillStyle = '#000000';
-    drawStrokedText('← Review Questions', rightCenterX, p8BtnY + retryH + 30 * scale);
+    drawStrokedText('← Review Questions', rightCenterX, p8BtnY + retryH + 26 * scale);
 
     ctx.textAlign = 'left';
 
@@ -400,7 +439,7 @@ export async function renderResultPageTexture(resultData, score, userName) {
 /**
  * Render all 5 quiz pages and page 8 to 3D page textures
  */
-export async function renderAllQuizTextures(questions, answers, score, userName, resultData) {
+export async function renderAllQuizTextures(questions, answers, score, userName, resultData, customSettings) {
   for (let i = 0; i < 5; i++) {
     const matIdx = i + 2; // 2..6 -> Pages 3..7
     const q = questions[i];
@@ -412,11 +451,12 @@ export async function renderAllQuizTextures(questions, answers, score, userName,
         5,
         answers[i],
         score,
-        userName
+        userName,
+        customSettings
       );
     }
   }
 
   // Render Page 8
-  await renderResultPageTexture(resultData, score, userName);
+  await renderResultPageTexture(resultData, score, userName, customSettings);
 }
