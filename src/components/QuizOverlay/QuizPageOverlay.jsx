@@ -37,24 +37,6 @@ export const QuizPageOverlay = () => {
     }
   });
 
-  const [parallax, setParallax] = useState({ rotX: 0, rotY: 0, transX: 0, transY: 0 });
-
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      const normX = (e.clientX / window.innerWidth - 0.5) * 2;
-      const normY = (e.clientY / window.innerHeight - 0.5) * 2;
-      setParallax({
-        rotX: -normY * 2.5,
-        rotY: normX * 3.5,
-        transX: normX * 5,
-        transY: normY * 4,
-      });
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
-
   // Only active when book is opened and on quiz pages 3 to 8
   if (!isBookEntered || currentPage < 3 || currentPage > 8) {
     return null;
@@ -64,13 +46,12 @@ export const QuizPageOverlay = () => {
     e.stopPropagation();
   };
 
-  // Page 8: Result Screen embedded on book page
+  // Page 8: Clickable hitboxes for Page 8 Result Spread
   if (currentPage === 8) {
     return (
       <>
         <div
-          key="page-8-result"
-          className="quiz-page-container quiz-result-page-container"
+          className="quiz-page-container quiz-interactive-hitbox-container"
           data-clickable="true"
           onMouseDown={stopCapture}
           onPointerDown={stopCapture}
@@ -78,100 +59,40 @@ export const QuizPageOverlay = () => {
           style={{
             width: `calc(var(--bookPixelWidth, 880px) * ${settings.widthPercent / 100})`,
             minHeight: `calc(var(--bookPixelWidth, 880px) * 0.57143 * ${settings.heightPercent / 100})`,
-            transform: `translate(calc(-50% + ${parallax.transX}px), calc(-50% + ${settings.offsetY + parallax.transY}px)) rotateX(${parallax.rotX}deg) rotateY(${parallax.rotY}deg)`,
+            transform: `translate(-50%, calc(-50% + ${settings.offsetY}px))`,
           }}
         >
           <div
             className="quiz-book-spread"
             style={{ gap: `${settings.spreadGap}px` }}
           >
-            {/* LEFT PAGE: Score & Badges */}
-            <div className="quiz-left-page quiz-result-left" data-clickable="true">
-              <div className="quiz-header-meta">
-                <span
-                  className="quiz-qnum-tag"
-                  style={{ borderWidth: `${settings.borderWidth}px` }}
-                >
-                  FINAL RESULT
-                </span>
-                <span
-                  className="quiz-difficulty-tag"
-                  style={{ borderWidth: `${settings.borderWidth}px` }}
-                >
-                  {resultData.score}
-                </span>
-              </div>
+            {/* LEFT PAGE: Visual only on 3D paper */}
+            <div className="quiz-left-page-hitbox" />
 
-              <div className="quiz-result-score-block">
-                <div className="quiz-result-icon">{resultData.badge}</div>
-                <h2 className="quiz-result-title">{resultData.label}</h2>
-                {userName && (
-                  <p className="quiz-result-teacher-name">
-                    Dedicated to: <strong>{userName}</strong>
-                  </p>
-                )}
-              </div>
-
-              <div
-                className="quiz-result-stats-row"
-                style={{ borderTopWidth: `${settings.borderWidth}px` }}
-              >
-                <div className="quiz-stat-pill" style={{ borderWidth: `${settings.borderWidth}px` }}>
-                  <span>Correct: <strong>{score}/5</strong></span>
-                </div>
-                <div className="quiz-stat-pill" style={{ borderWidth: `${settings.borderWidth}px` }}>
-                  <span>Accuracy: <strong>{Math.round((score / 5) * 100)}%</strong></span>
-                </div>
-              </div>
-            </div>
-
-            {/* RIGHT PAGE: Message & Actions */}
-            <div className="quiz-right-page quiz-result-right" data-clickable="true">
-              <div className="quiz-options-header">
-                <span className="quiz-options-title">The Compliment</span>
-                <span
-                  className="quiz-points-badge"
-                  style={{ borderWidth: `${settings.borderWidth}px` }}
-                >
-                  Teacher's Day
-                </span>
-              </div>
-
-              <div className="quiz-result-message-box">
-                <p className="quiz-result-description">
-                  "{resultData.message}"
-                </p>
-              </div>
-
-              <div
-                className="quiz-actions-row"
-                style={{ borderTopWidth: `${settings.borderWidth}px` }}
-              >
+            {/* RIGHT PAGE: Clickable Actions over 3D paper */}
+            <div className="quiz-right-page-hitbox" data-clickable="true">
+              <div className="quiz-page-8-actions">
                 <button
                   type="button"
-                  className="quiz-prev-btn"
+                  className="quiz-paper-btn-hitbox prev-btn-hitbox"
                   data-clickable="true"
                   onClick={() => goToPage(7)}
                   onMouseDown={stopCapture}
                   onPointerDown={stopCapture}
                   onTouchStart={stopCapture}
-                  style={{ borderWidth: `${settings.borderWidth}px` }}
-                >
-                  ← Review Q5
-                </button>
+                  title="Review Question 5"
+                />
 
                 <button
                   type="button"
-                  className="quiz-next-btn"
+                  className="quiz-paper-btn-hitbox retry-btn-hitbox"
                   data-clickable="true"
                   onClick={restartQuiz}
                   onMouseDown={stopCapture}
                   onPointerDown={stopCapture}
                   onTouchStart={stopCapture}
-                  style={{ borderWidth: `${settings.borderWidth}px` }}
-                >
-                  <span>🔄 Try 5 New Questions</span>
-                </button>
+                  title="Try 5 New Questions"
+                />
               </div>
             </div>
           </div>
@@ -207,13 +128,10 @@ export const QuizPageOverlay = () => {
     }
   };
 
-  const optionLetters = ['A', 'B', 'C', 'D'];
-
   return (
     <>
       <div
-        key={`page-quiz-${currentPage}`}
-        className="quiz-page-container"
+        className="quiz-page-container quiz-interactive-hitbox-container"
         data-clickable="true"
         onMouseDown={stopCapture}
         onPointerDown={stopCapture}
@@ -221,149 +139,65 @@ export const QuizPageOverlay = () => {
         style={{
           width: `calc(var(--bookPixelWidth, 880px) * ${settings.widthPercent / 100})`,
           minHeight: `calc(var(--bookPixelWidth, 880px) * 0.57143 * ${settings.heightPercent / 100})`,
-          transform: `translate(calc(-50% + ${parallax.transX}px), calc(-50% + ${settings.offsetY + parallax.transY}px)) rotateX(${parallax.rotX}deg) rotateY(${parallax.rotY}deg)`,
+          transform: `translate(-50%, calc(-50% + ${settings.offsetY}px))`,
         }}
       >
-        {/* Two-page book spread: Left is Question, Right is Options */}
+        {/* Two-page book spread: Left is Question (on 3D paper), Right has Option Click Hitboxes */}
         <div
           className="quiz-book-spread"
           style={{ gap: `${settings.spreadGap}px` }}
         >
-          {/* LEFT SIDE: Question prompt & Info */}
-          <div className="quiz-left-page" data-clickable="true">
-            <div className="quiz-header-meta">
-              <span
-                className="quiz-qnum-tag"
-                style={{ borderWidth: `${settings.borderWidth}px` }}
-              >
-                QUESTION 0{questionIndex + 1} / 05
-              </span>
-              <span
-                className="quiz-difficulty-tag"
-                style={{ borderWidth: `${settings.borderWidth}px` }}
-              >
-                {question.difficulty === 'Easy' ? 'Classroom Moment' : 'Real-Life Scenario'}
-              </span>
-            </div>
+          {/* LEFT SIDE: Pure 3D Paper Texture (No duplicate HTML text) */}
+          <div className="quiz-left-page-hitbox" />
 
-            <div className="quiz-question-box">
-              <p
-                className="quiz-question-prompt"
-                style={{ fontSize: `${settings.questionFontSize}px` }}
-              >
-                "{question.scenario}"
-              </p>
-            </div>
-
-            <div
-              className="quiz-left-footer"
-              style={{ borderTopWidth: `${settings.borderWidth}px` }}
-            >
-              <div className="quiz-score-indicator">
-                <span>⭐ Score: <strong>{score}</strong> / 5</span>
-              </div>
-              {userName && (
-                <span
-                  className="quiz-teacher-pill"
-                  style={{ borderWidth: `${settings.borderWidth}px` }}
-                >
-                  Teacher: {userName}
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* RIGHT SIDE: 4 Selectable Options with only text & black border */}
-          <div className="quiz-right-page" data-clickable="true">
-            <div className="quiz-options-header">
-              <span className="quiz-options-title">Select the best completion:</span>
-              <span
-                className="quiz-points-badge"
-                style={{ borderWidth: `${settings.borderWidth}px` }}
-              >
-                +1 pt
-              </span>
-            </div>
-
-            <div className="quiz-options-list">
+          {/* RIGHT SIDE: 4 Clickable Option Card Hitboxes + Navigation */}
+          <div className="quiz-right-page-hitbox" data-clickable="true">
+            {/* 4 Invisible Clickable Cards directly over the 3D paper options */}
+            <div className="quiz-options-hitbox-list">
               {question.options.map((opt, idx) => {
-                const isSelected = selectedOptionIndex === idx;
-                let cardClass = 'quiz-option-card';
-                if (isSelected) {
-                  cardClass += ' selected';
-                }
-
                 return (
                   <button
                     key={idx}
                     type="button"
-                    className={cardClass}
+                    className="quiz-option-hitbox"
                     data-clickable="true"
                     onClick={() => handleOptionSelect(idx)}
                     onMouseDown={stopCapture}
                     onPointerDown={stopCapture}
                     onTouchStart={stopCapture}
-                    aria-label={`Option ${optionLetters[idx]}: ${opt.text}`}
-                    style={{
-                      borderWidth: `${isSelected ? settings.borderWidth + 1.5 : settings.borderWidth}px`,
-                      padding: `${settings.optionPadding}px 14px`,
-                    }}
-                  >
-                    <span
-                      className="quiz-option-letter"
-                      style={{ borderWidth: `${settings.borderWidth}px` }}
-                    >
-                      {optionLetters[idx]}
-                    </span>
-                    <span
-                      className="quiz-option-text"
-                      style={{ fontSize: `${settings.optionFontSize}px` }}
-                    >
-                      {opt.text}
-                    </span>
-                    {isSelected && (
-                      <span className="quiz-option-check">✓</span>
-                    )}
-                  </button>
+                    aria-label={`Option ${idx + 1}: ${opt.text}`}
+                    title={`Click to choose Option ${['A', 'B', 'C', 'D'][idx]}`}
+                  />
                 );
               })}
             </div>
 
-            {/* Navigation Actions on Right Page */}
-            <div
-              className="quiz-actions-row"
-              style={{ borderTopWidth: `${settings.borderWidth}px` }}
-            >
+            {/* Navigation Hitboxes */}
+            <div className="quiz-actions-hitbox-row">
               {currentPage > 3 && (
                 <button
                   type="button"
-                  className="quiz-prev-btn"
+                  className="quiz-paper-btn-hitbox prev-btn-hitbox"
                   data-clickable="true"
                   onClick={handlePrev}
                   onMouseDown={stopCapture}
                   onPointerDown={stopCapture}
                   onTouchStart={stopCapture}
-                  style={{ borderWidth: `${settings.borderWidth}px` }}
-                >
-                  ← Back
-                </button>
+                  title="Back to Previous Page"
+                />
               )}
 
               <button
                 type="button"
-                className={`quiz-next-btn ${!isAnswered ? 'disabled' : ''}`}
+                className={`quiz-paper-btn-hitbox next-btn-hitbox ${!isAnswered ? 'disabled' : ''}`}
                 disabled={!isAnswered}
                 data-clickable="true"
                 onClick={handleNext}
                 onMouseDown={stopCapture}
                 onPointerDown={stopCapture}
                 onTouchStart={stopCapture}
-                style={{ borderWidth: `${settings.borderWidth}px` }}
-              >
-                <span>
-                  {isLastQuestion ? 'Next → (Page 8 Result)' : 'Next Question →'}
-                </span>
-              </button>
+                title={isLastQuestion ? 'Go to Page 8 Result' : 'Go to Next Question'}
+              />
             </div>
           </div>
         </div>
@@ -374,6 +208,7 @@ export const QuizPageOverlay = () => {
     </>
   );
 };
+
 
 
 

@@ -227,6 +227,57 @@ export async function renderQuizPageTexture(materialIndex, questionData, questio
       }
     });
 
+    // Right Page Footer: Next & Back Buttons
+    const btnRowY = H - 120 * scale;
+    ctx.beginPath();
+    ctx.moveTo(rightX, btnRowY - 20 * scale);
+    ctx.lineTo(rightX + rightW, btnRowY - 20 * scale);
+    ctx.lineWidth = 2.5 * scale;
+    ctx.strokeStyle = '#000000';
+    ctx.stroke();
+
+    // Back Button (if questionNumber > 1)
+    if (questionNumber > 1) {
+      drawRoundedRect(ctx, rightX, btnRowY - 14 * scale, 100 * scale, 36 * scale, 18 * scale);
+      ctx.lineWidth = 2 * scale;
+      ctx.strokeStyle = '#000000';
+      ctx.stroke();
+      ctx.font = `800 ${14 * scale}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      drawStrokedText('← Back', rightX + 50 * scale, btnRowY + 4 * scale);
+    }
+
+    // Next Button (Right aligned)
+    const nextBtnW = 180 * scale;
+    const nextBtnH = 38 * scale;
+    const nextBtnX = rightX + rightW - nextBtnW;
+    const isAnswered = selectedOptionIndex !== undefined;
+    const isLastQ = questionNumber === totalQuestions;
+
+    drawRoundedRect(ctx, nextBtnX, btnRowY - 15 * scale, nextBtnW, nextBtnH, 19 * scale);
+    if (isAnswered) {
+      ctx.fillStyle = '#000000';
+      ctx.fill();
+      ctx.lineWidth = 2 * scale;
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.stroke();
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = `800 ${14 * scale}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(isLastQ ? 'Next → (Page 8) 🎉' : 'Next Question →', nextBtnX + nextBtnW / 2, btnRowY + 4 * scale);
+    } else {
+      ctx.lineWidth = 2 * scale;
+      ctx.strokeStyle = '#000000';
+      ctx.stroke();
+      ctx.font = `800 ${14 * scale}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      drawStrokedText(isLastQ ? 'Next → (Page 8)' : 'Next Question →', nextBtnX + nextBtnW / 2, btnRowY + 4 * scale);
+    }
+    ctx.textAlign = 'left';
+
     // Update Three.js Texture directly on the 3D book material
     if (window.Main && window.Main.maskRevealView && window.Main.maskRevealView.pageMaterials) {
       const mat = window.Main.maskRevealView.pageMaterials[materialIndex];
@@ -304,6 +355,27 @@ export async function renderResultPageTexture(resultData, score, userName) {
     msgLines.forEach((l, lIdx) => {
       drawStrokedText(l, rightCenterX, 300 * scale + lIdx * 44 * scale);
     });
+
+    // Page 8 Action Buttons (Printed on 3D paper)
+    const p8BtnY = H - 140 * scale;
+    // Retry Button
+    const retryW = 240 * scale;
+    const retryH = 44 * scale;
+    const retryX = rightCenterX - retryW / 2;
+    drawRoundedRect(ctx, retryX, p8BtnY, retryW, retryH, 22 * scale);
+    ctx.fillStyle = '#000000';
+    ctx.fill();
+    ctx.lineWidth = 2 * scale;
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.stroke();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = `800 ${16 * scale}px sans-serif`;
+    ctx.fillText('🔄 Try 5 New Questions', rightCenterX, p8BtnY + retryH / 2);
+
+    // Review Button
+    ctx.font = `700 ${14 * scale}px sans-serif`;
+    ctx.fillStyle = '#000000';
+    drawStrokedText('← Review Questions', rightCenterX, p8BtnY + retryH + 30 * scale);
 
     ctx.textAlign = 'left';
 
